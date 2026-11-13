@@ -1,0 +1,10 @@
+{
+  "description": "A formal blue-themed website that presents information clearly and professionally for visitors seeking a polished, trustworthy online experience.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
