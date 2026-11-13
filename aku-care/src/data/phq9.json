@@ -1,0 +1,11 @@
+[
+  { "id": 1, "text": "Kurang berminat atau bergairah dalam melakukan apapun" },
+  { "id": 2, "text": "Merasa murung, sedih, atau putus asa" },
+  { "id": 3, "text": "Sulit tidur, sering terbangun, atau terlalu banyak tidur" },
+  { "id": 4, "text": "Merasa lelah atau kurang bertenaga" },
+  { "id": 5, "text": "Kurang nafsu makan atau makan terlalu banyak" },
+  { "id": 6, "text": "Merasa buruk tentang diri sendiri, merasa gagal, atau mengecewakan keluarga" },
+  { "id": 7, "text": "Sulit berkonsentrasi pada sesuatu, misalnya membaca atau menonton televisi" },
+  { "id": 8, "text": "Bergerak atau berbicara sangat lambat, atau sebaliknya merasa gelisah dan tidak bisa diam" },
+  { "id": 9, "text": "Merasa lebih baik mati atau ingin melukai diri sendiri dengan cara apapun" }
+]
