@@ -4,6 +4,7 @@ import doctorPhoto from "./assets/akk-doctor.jpg";
 import { supabase } from "./lib/supabase";
 import { TalkbackProvider } from "./Talckback";
 import { DoctorSection } from "./Dokter";
+import { ChatbotSheet } from "./Chatbot";
 
 // 1. Tipe View diperbarui untuk form lupa sandi
 type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard";
@@ -611,6 +612,7 @@ const dashboardServices: { icon: IconName; title: string; text: string; tag?: st
 function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
   const [voice, setVoice] = useState(false);
   const [sos, setSos] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
   const [notice, setNotice] = useState("");
 
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
@@ -706,7 +708,18 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                   </div>
                   <div className="dash-service-grid">
                     {dashboardServices.map((service) => (
-                      <button key={service.title} onClick={() => service.icon === "ambulance" ? setSos(true) : setNotice(`${service.title} dibuka`)}>
+                      <button 
+                        key={service.title} 
+                        onClick={() => {
+                          if (service.icon === "ambulance") {
+                            setSos(true);
+                          } else if (service.title === "Chatbot Pendamping") {
+                            setShowChatbot(true); // <--- Buka Chatbot
+                          } else {
+                            setNotice(`${service.title} dibuka`);
+                          }
+                        }}
+                      >
                         <span className={`dash-service-icon ${service.icon}`}><Icon name={service.icon} size={23} /></span>
                         <span><strong>{service.title} {service.tag && <em>{service.tag}</em>}</strong><small>{service.text}</small></span>
                         <Icon name="arrow" size={16} />
@@ -781,6 +794,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
             </section>
           </div>
         )}
+        {showChatbot && <ChatbotSheet onClose={() => setShowChatbot(false)} />}
         <div className={`toast ${notice ? "show" : ""}`} role="status">{notice}</div>
       </div>
     </TalkbackProvider>

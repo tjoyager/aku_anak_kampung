@@ -174,7 +174,7 @@ export function DoctorSection({ onOpenChat, voiceModeActive = false }: DoctorSec
           border: 1px solid #cbd5e1;
           border-radius: 8px;
           color: #2563eb;
-          font-size: 13px;
+          font-size: 8px;
           font-weight: 500;
           font-family: inherit;
           cursor: pointer;
