@@ -5,6 +5,7 @@ import { supabase } from "./lib/supabase";
 import { TalkbackProvider } from "./Talkback";
 import { DoctorSection } from "./Dokter";
 import { ChatbotSheet } from "./Chatbot";
+import NearbyHospitalsMap from "./RumahSakit";
 
 // 1. Tipe View diperbarui untuk form lupa sandi
 type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard";
@@ -613,6 +614,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
   const [voice, setVoice] = useState(false);
   const [sos, setSos] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const [notice, setNotice] = useState("");
 
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
@@ -711,10 +713,13 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                       <button 
                         key={service.title} 
                         onClick={() => {
-                          if (service.icon === "ambulance") {
+                          // Kita cek judulnya langsung, urutkan dari yang paling spesifik
+                          if (service.title === "Rumah Sakit Terdekat") {
+                            setShowMap(true);
+                          } else if (service.title === "Panggil Ambulans") {
                             setSos(true);
                           } else if (service.title === "Chatbot Pendamping") {
-                            setShowChatbot(true); // <--- Buka Chatbot
+                            setShowChatbot(true);
                           } else {
                             setNotice(`${service.title} dibuka`);
                           }
@@ -795,6 +800,28 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
           </div>
         )}
         {showChatbot && <ChatbotSheet onClose={() => setShowChatbot(false)} />}
+        {showMap && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column' }}>
+            {/* Header Overlay */}
+            <header style={{ padding: '16px', backgroundColor: '#0d9488', color: 'white', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+              <button 
+                onClick={() => setShowMap(false)} 
+                style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', fontWeight: 'bold', padding: 0 }}
+              >
+                <span style={{ transform: 'rotate(180deg)', display: 'inline-block', marginRight: '8px' }}>
+                  <Icon name="arrow" size={20} />
+                </span> 
+                Kembali
+              </button>
+              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>Fasilitas Kesehatan Terdekat</h2>
+            </header>
+            
+            {/* Area Peta */}
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+              <NearbyHospitalsMap />
+            </div>
+          </div>
+        )}
         <div className={`toast ${notice ? "show" : ""}`} role="status">{notice}</div>
       </div>
     </TalkbackProvider>
