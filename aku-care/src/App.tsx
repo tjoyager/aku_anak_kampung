@@ -2,7 +2,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import doctorPhoto from "./assets/akk-doctor.jpg";
 import { supabase } from "./lib/supabase";
-import { TalkbackProvider } from "./Talckback";
+import { TalkbackProvider } from "./Talkback";
 import { DoctorSection } from "./Dokter";
 import { ChatbotSheet } from "./Chatbot";
 
