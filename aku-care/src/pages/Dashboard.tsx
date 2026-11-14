@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon, type IconName } from "../components/ui/Icons";
 import { Brand } from "../components/ui/Brand";
+import { AppHeader } from "../components/layout/AppHeader";
 import { supabase } from "../lib/supabase";
 import { TalkbackProvider } from "../Talkback";
 import { DoctorSection } from "../Dokter";
 import { ChatbotSheet } from "../Chatbot";
 import PHQ9Screen from "../components/PHQ9Screen";
-import HospitalMap from "../components/HospitalMap";
 import ChatRoom from "../components/ChatRoom";
+import NearbyHospitalsMap from "../RumahSakit";
 import { activateVibration, setColorBlindMode } from "../utils/accessibility";
+import { publicArticles } from "../data/publicArticles";
 import type { View } from "../App";
 
 type ColorBlindMode = "normal" | "protanopia" | "deuteranopia" | "tritanopia";
@@ -24,38 +26,39 @@ const dashboardServices: { icon: IconName; title: string; text: string; tag?: st
   { icon: "book", title: "Informasi Kesehatan", text: "Artikel terkurasi dari sumber kredibel" },
 ];
 
-const publicArticles = [
-  {
-    type: "Edukasi Kesehatan",
-    title: "Langkah sederhana menjaga kesehatan mental setiap hari",
-    summary: "Kenali kebiasaan yang membantu menjaga kesehatan emosi dan kapan perlu menghubungi tenaga profesional.",
-    source: "Sumber: Kementerian Kesehatan RI",
-    date: "8 Nov 2026",
-    theme: "mental",
-  },
-  {
-    type: "Pertolongan Pertama",
-    title: "Panduan awal menghadapi kondisi pingsan",
-    summary: "Pelajari langkah aman yang dapat dilakukan sembari menunggu bantuan tenaga kesehatan.",
-    source: "Sumber: Kementerian Kesehatan RI",
-    date: "6 Nov 2026",
-    theme: "firstaid",
-  },
-  {
-    type: "Gizi",
-    title: "Memahami pola gizi seimbang untuk keluarga",
-    summary: "Ringkasan praktis mengenai variasi makanan, porsi, dan kebiasaan makan sehat.",
-    source: "Sumber: Kementerian Kesehatan RI",
-    date: "4 Nov 2026",
-    theme: "nutrition",
-  },
-];
-
 const serviceIconStyles: Partial<Record<IconName, string>> = {
   ambulance: "text-[#c63e4a] bg-[#ffeaec]",
   brain: "text-[#7257b5] bg-[#efebff]",
   doctor: "text-[#147d76] bg-[#e5f5f2]",
 };
+
+const sidebarMenu: { icon: IconName; label: string }[] = [
+  { icon: "home", label: "Beranda" },
+  { icon: "phone", label: "Darurat" },
+  { icon: "brain", label: "Tes Kesehatan" },
+  { icon: "message", label: "Konsultasi" },
+  { icon: "book", label: "Informasi" },
+];
+
+/* ------------------------------ Utilities ------------------------------ */
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+function formatTanggalIndo(d: Date) {
+  const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const bulan = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  ];
+  return `${hari[d.getDay()]}, ${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function getSapaan(d: Date) {
+  const h = d.getHours();
+  if (h < 11) return "Selamat pagi";
+  if (h < 15) return "Selamat siang";
+  if (h < 18) return "Selamat sore";
+  return "Selamat malam";
+}
 
 export default function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
   const [voice, setVoice] = useState(false);
@@ -65,13 +68,17 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
   const [showChatbot, setShowChatbot] = useState(false);
   const [showChatRoom, setShowChatRoom] = useState(false);
   const [showPHQ9, setShowPHQ9] = useState(false);
-  const [showHospitalMap, setShowHospitalMap] = useState(false);
+  const [showNearbyHospitals, setShowNearbyHospitals] = useState(false);
   const [notice, setNotice] = useState("");
 
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const displayName = (meta.full_name as string) || (meta.username as string) || user.email || "Budi Pratama";
   const firstName = displayName.split(" ")[0];
   const initials = displayName.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase() || "BP";
+
+  const today = useMemo(() => new Date(), []);
+  const tanggalIndo = useMemo(() => formatTanggalIndo(today), [today]);
+  const sapaan = useMemo(() => getSapaan(today), [today]);
 
   useEffect(() => {
     if (!notice) return;
@@ -117,7 +124,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
     } else if (serviceTitle === "Tes Kesehatan Mental") {
       setShowPHQ9(true);
     } else if (serviceTitle === "Rumah Sakit Terdekat") {
-      setShowHospitalMap(true);
+      setShowNearbyHospitals(true);
     } else if (serviceTitle === "Chatbot Pendamping") {
       setShowChatbot(true);
     } else if (serviceTitle === "Konsultasi Dokter") {
@@ -127,6 +134,16 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
     }
   };
 
+  /* ------------------------------ Variants ------------------------------ */
+  const staggerContainer = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+  };
+  const staggerItem = {
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+  };
+
   return (
     <TalkbackProvider voiceModeActive={voice}>
       <motion.div
@@ -134,148 +151,112 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="min-h-screen bg-canvas font-sans text-text"
+        className="min-h-screen bg-[#f6f8fb] font-sans text-slate-800"
       >
         <a
-          className="fixed z-[100] left-[15px] -top-[60px] focus:top-3 px-4 py-2.5 rounded-[7px] text-white bg-navy transition-all"
+          className="fixed z-[100] left-4 -top-16 focus:top-4 px-4 py-2.5 rounded-lg text-white bg-[#082d58] transition-all shadow-lg"
           href="#dashboard-main"
         >
           Lewati ke konten utama
         </a>
 
-        {/* Sidebar Desktop & Tablet */}
-        <aside className="fixed z-20 inset-y-0 left-0 w-[205px] lg:w-[235px] hidden md:flex flex-col pt-[25px] px-[17px] pb-[17px] border-r border-[#dce6f0] bg-white">
-          <div className="px-2 pb-[27px]">
+        {/* ================= SIDEBAR (desktop & tablet) ================= */}
+        <aside className="fixed z-20 inset-y-0 left-0 w-[240px] lg:w-[260px] hidden md:flex flex-col bg-white border-r border-slate-200">
+          <div className="h-[76px] flex items-center px-6 border-b border-slate-100">
             <Brand />
           </div>
 
-          <nav className="flex flex-col gap-[3px]" aria-label="Menu utama dasbor">
-            <span className="mx-2.5 mt-[13px] mb-[5px] text-[#9aa7b4] text-[7.5px] font-extrabold tracking-[0.12em]">
-              MENU UTAMA
+          <nav className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-1" aria-label="Menu utama">
+            <span className="px-3 mb-2 text-slate-400 text-[10px] font-bold tracking-[0.15em] uppercase">
+              Menu Utama
             </span>
-            {(
-              [
-                ["home", "Beranda"],
-                ["phone", "Darurat"],
-                ["brain", "Tes Kesehatan"],
-                ["message", "Konsultasi"],
-                ["book", "Informasi"],
-              ] as [IconName, string][]
-            ).map(([icon, label], index) => (
+            {sidebarMenu.map(({ icon, label }, index) => (
               <button
                 key={label}
                 onClick={() => (index === 1 ? setSos(true) : setNotice(`${label} dibuka`))}
-                className={`min-h-[43px] flex items-center gap-[11px] px-[11px] border-0 rounded-lg text-[10px] text-left transition-colors ${
+                className={`min-h-[44px] flex items-center gap-3 px-3 rounded-xl text-[13px] font-medium text-left transition-all ${
                   index === 0
-                    ? "text-blue bg-pale font-bold"
-                    : "text-[#60758a] bg-transparent hover:bg-slate-50 hover:text-navy"
+                    ? "text-[#0066cc] bg-[#eaf4ff] shadow-[inset_2px_0_0_#0066cc]"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
-                <Icon name={icon} /> {label}
+                <Icon name={icon} size={18} /> {label}
               </button>
             ))}
 
-            <span className="mx-2.5 mt-[13px] mb-[5px] text-[#9aa7b4] text-[7.5px] font-extrabold tracking-[0.12em]">
-              PENGELOLAAN
+            <span className="px-3 mt-6 mb-2 text-slate-400 text-[10px] font-bold tracking-[0.15em] uppercase">
+              Pengelolaan
             </span>
             <button
               onClick={() => setNotice("Profil medis dibuka")}
-              className="min-h-[43px] flex items-center gap-[11px] px-[11px] border-0 rounded-lg text-[10px] text-left text-[#60758a] bg-transparent hover:bg-slate-50 hover:text-navy transition-colors"
+              className="min-h-[44px] flex items-center gap-3 px-3 rounded-xl text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
             >
-              <Icon name="user" /> Profil & Info Medis
+              <Icon name="user" size={18} /> Profil & Info Medis
             </button>
             <button
               onClick={() => setNotice("Pengaturan aksesibilitas dibuka")}
-              className="min-h-[43px] flex items-center gap-[11px] px-[11px] border-0 rounded-lg text-[10px] text-left text-[#60758a] bg-transparent hover:bg-slate-50 hover:text-navy transition-colors"
+              className="min-h-[44px] flex items-center gap-3 px-3 rounded-xl text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
             >
-              <Icon name="settings" /> Pengaturan
+              <Icon name="settings" size={18} /> Pengaturan
             </button>
           </nav>
 
-          <div className="flex items-center gap-2 mt-auto pt-[13px] px-[5px] border-t border-[#edf1f5]">
-            <div className="w-[34px] h-[34px] flex-none grid place-items-center rounded-[9px] text-white bg-[#365e86] text-[9px] font-extrabold">
-              {initials}
+          <div className="p-4 border-t border-slate-100">
+            <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+              <div className="min-w-0 flex-1">
+                <strong className="block text-[13px] text-slate-800 truncate">{displayName}</strong>
+                <small className="block text-[11px] text-slate-500 truncate">
+                  {(meta.username as string) || "Pengguna"}
+                </small>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="px-2 py-1 border-0 rounded-md bg-transparent text-[11px] font-semibold text-slate-400 hover:text-red-500 transition-colors"
+              >
+                Keluar
+              </button>
             </div>
-            <span className="min-w-0 flex-1">
-              <strong className="block text-[9px] truncate">{displayName}</strong>
-              <small className="block mt-0.5 text-[#8291a0] text-[7px] truncate">
-                {(meta.username as string) || "Pengguna"}
-              </small>
-            </span>
-            <button
-              onClick={handleLogout}
-              className="p-[3px] border-0 bg-transparent text-[#8a98a6] text-[7.5px] hover:text-danger transition-colors"
-            >
-              Keluar
-            </button>
           </div>
         </aside>
 
-        {/* Konten Utama */}
-        <div className="md:ml-[205px] lg:ml-[235px]">
-          {/* Topbar */}
-          <header className="sticky md:static z-25 top-0 h-[68px] flex items-center justify-between px-[18px] md:px-8 border-b border-[#dce6f0] bg-white/95 backdrop-blur-sm">
-            <div className="block md:hidden">
-              <Brand />
-            </div>
+        {/* ================= KONTEN UTAMA ================= */}
+        <div className="md:ml-[240px] lg:ml-[260px] flex flex-col min-h-screen">
+          
+          {/* HEADER REUSABLE */}
+          <AppHeader
+            user={user}
+            hideBrand={true}
+            onNotify={(msg) => setNotice(msg)}
+          />
 
-            <label className="hidden md:flex w-[330px] h-[36px] items-center gap-2 px-[11px] border border-[#dce5ee] rounded-[7px] text-[#8493a2] bg-[#f8fafc] focus-within:border-blue transition-colors">
-              <Icon name="search" size={18} />
-              <input
-                className="min-w-0 flex-1 border-0 outline-none bg-transparent text-[9px] text-text"
-                placeholder="Cari layanan atau informasi"
-                aria-label="Cari layanan atau informasi"
-              />
-            </label>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleVoice}
-                className={`h-[34px] w-[34px] md:w-auto flex items-center justify-center gap-1.5 p-0 md:px-[11px] border rounded-[7px] text-[8.5px] transition-colors ${
-                  voice
-                    ? "text-blue border-[#a8ccec] bg-pale font-semibold"
-                    : "text-[#5f7388] border-[#dbe5ee] bg-white hover:bg-slate-50"
-                }`}
-              >
-                <Icon name="volume" size={17} />
-                <span className="hidden md:inline">{voice ? "Suara aktif" : "Mode suara"}</span>
-              </button>
-              <button
-                className="w-[34px] h-[34px] grid place-items-center border border-[#dbe5ee] rounded-[7px] text-[#65778a] bg-white hover:bg-slate-50 transition-colors"
-                aria-label="Notifikasi"
-              >
-                <Icon name="bell" />
-              </button>
-              <div className="w-[34px] h-[34px] grid flex-none place-items-center rounded-[9px] text-white bg-[#365e86] text-[9px] font-extrabold">
-                {initials}
-              </div>
-            </div>
-          </header>
-
-          <main id="dashboard-main" className="mx-auto px-[18px] pt-[22px] pb-[80px] md:px-8 md:pt-[27px] md:pb-[55px]">
-            {/* Welcome Header */}
+          {/* Main content */}
+          <main
+            id="dashboard-main"
+            className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8"
+          >
+            {/* Welcome */}
             <motion.section
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="flex items-start sm:items-end justify-between mb-5 gap-3"
+              transition={{ duration: 0.4, ease: EASE }}
+              className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8"
             >
               <div>
-                <span className="text-[#8798a8] text-[7.5px] font-extrabold tracking-[0.11em]">
-                  KAMIS, 8 NOVEMBER 2026
+                <span className="text-slate-500 text-[11px] font-bold tracking-[0.15em] uppercase">
+                  {tanggalIndo}
                 </span>
-                <h1 className="mt-1.5 text-navy font-manrope font-extrabold text-[23px] tracking-[-0.03em]">
-                  Selamat pagi, {firstName}.
+                <h1 className="mt-1.5 text-[#082d58] font-manrope font-extrabold text-2xl sm:text-3xl tracking-tight">
+                  {sapaan}, {firstName}.
                 </h1>
-                <p className="mt-[3px] text-[#718398] text-[10px]">
+                <p className="mt-1.5 text-slate-500 text-[14px]">
                   Akses layanan dan informasi kesehatan Anda dari satu tempat.
                 </p>
               </div>
               <button
                 onClick={() => setNotice("Pengaturan cepat dibuka")}
-                className="hidden sm:flex h-[35px] items-center gap-[7px] px-[11px] border border-[#cbd9e7] rounded-[7px] text-[#45627e] bg-white text-[8.5px] hover:bg-slate-50 transition-colors"
+                className="hidden sm:flex h-[42px] items-center gap-2 px-4 border border-slate-200 rounded-xl text-slate-700 bg-white text-[13px] font-semibold hover:bg-slate-50 transition-colors shadow-sm"
               >
-                <Icon name="settings" /> Pengaturan aksesibilitas
+                <Icon name="settings" size={18} /> Pengaturan Aksesibilitas
               </button>
             </motion.section>
 
@@ -283,311 +264,200 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
             <motion.section
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.05 }}
-              className="relative min-h-[300px] sm:min-h-[245px] flex overflow-hidden rounded-[14px] text-white bg-gradient-to-br from-[#082f5e] to-blue shadow-sm"
+              transition={{ duration: 0.45, delay: 0.05, ease: EASE }}
+              className="relative flex overflow-hidden rounded-2xl text-white bg-gradient-to-r from-[#082d58] via-[#004fa3] to-[#0066cc] shadow-[0_8px_30px_#082d581a] min-h-[220px] sm:min-h-[240px]"
             >
-              <div className="relative z-10 w-full sm:w-[85%] md:w-[70%] py-[25px] px-[22px] sm:p-[27px] md:py-8 md:px-[37px]">
-                <span className="inline-flex items-center gap-[5px] text-[#b9dcff] text-[7.5px] font-extrabold tracking-[0.1em]">
-                  <Icon name="shield" size={15} /> PENDAMPING KESEHATAN ANDA
+              <div className="relative z-10 w-full sm:w-[80%] md:w-[65%] p-6 sm:p-8 md:p-10">
+                <span className="inline-flex items-center gap-1.5 text-[#b9dcff] text-[10px] font-bold tracking-[0.15em] uppercase">
+                  <Icon name="shield" size={14} /> Pendamping Kesehatan Anda
                 </span>
-                <h2 className="mt-[13px] font-manrope font-bold text-[22px] sm:text-[26px] leading-[1.25] tracking-[-0.025em]">
+                <h2 className="mt-3 font-manrope font-bold text-xl sm:text-2xl md:text-[28px] leading-snug">
                   Layanan kesehatan yang dapat
-                  <br />
-                  Anda akses secara mandiri.
+                  <br className="hidden sm:block" /> Anda akses secara mandiri.
                 </h2>
-                <p className="max-w-[80%] sm:max-w-[560px] mt-2 text-[#c2d9ef] text-[10px] leading-[1.6]">
+                <p className="max-w-md mt-2.5 text-[#c2d9ef] text-[13px] leading-relaxed">
                   Gunakan skrining kesehatan mental, konsultasi dokter, layanan darurat, dan informasi tepercaya sesuai kebutuhan Anda.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setNotice("Direktori dokter dibuka")}
-                  className="min-h-[36px] flex items-center gap-2 mt-[17px] px-[14px] border-0 rounded-md text-[#0755a3] bg-white text-[9px] font-bold hover:bg-slate-50 transition-colors"
+                  className="min-h-[42px] flex items-center gap-2 mt-6 px-5 rounded-lg text-[#0755a3] bg-white text-[13px] font-bold hover:bg-slate-50 transition-colors shadow-sm"
                 >
-                  Mulai konsultasi <Icon name="arrow" size={17} />
+                  Mulai Konsultasi <Icon name="arrow" size={16} />
                 </motion.button>
               </div>
               <img
                 src="/fitur-0.jpg"
                 alt="Dokter profesional Aku Care"
-                className="absolute z-[1] -right-[60px] md:right-[30px] -bottom-[68px] w-[215px] h-[315px] object-cover object-[center_20%] rounded-[120px_120px_20px_20px] opacity-45 md:opacity-95 pointer-events-none"
+                className="absolute z-[1] -right-[40px] sm:right-[20px] -bottom-[40px] w-[220px] h-[300px] object-cover rounded-t-full opacity-30 sm:opacity-100 pointer-events-none"
               />
             </motion.section>
 
-            {/* Main Dashboard Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_295px] gap-[22px] mt-[25px]">
-              {/* Kolom Kiri: Layanan & Artikel */}
-              <div className="min-w-0">
+            {/* Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 mt-8">
+              {/* Kolom kiri */}
+              <div className="min-w-0 flex flex-col gap-8">
                 {/* Layanan Utama */}
                 <section>
-                  <div className="flex items-end justify-between mb-[13px]">
+                  <div className="flex items-end justify-between mb-4">
                     <div>
-                      <h2 className="text-navy font-manrope font-bold text-[14px]">Layanan utama</h2>
-                      <p className="mt-[3px] text-[#8191a1] text-[8px]">Seluruh layanan tersedia untuk akun Anda</p>
+                      <h2 className="text-[#082d58] font-manrope font-bold text-lg">Layanan Utama</h2>
+                      <p className="mt-1 text-slate-500 text-[13px]">
+                        Seluruh layanan tersedia untuk akun Anda
+                      </p>
                     </div>
-                    <span className="flex items-center gap-1 py-[5px] px-2 rounded-full text-[#147250] bg-[#e6f5ee] text-[7px] font-bold">
-                      <Icon name="shield" size={14} /> Akses aktif
+                    <span className="flex items-center gap-1.5 py-1 px-2.5 rounded-full text-emerald-700 bg-emerald-50 border border-emerald-100 text-[11px] font-bold">
+                      <Icon name="shield" size={13} /> Akses Aktif
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-[9px]">
-                    {dashboardServices.map((service, idx) => (
+                  <motion.div
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
+                  >
+                    {dashboardServices.map((service) => (
                       <motion.button
                         key={service.title}
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.35, delay: 0.08 + idx * 0.04 }}
-                        whileHover={{ y: -2 }}
-                        whileTap={{ scale: 0.99 }}
+                        variants={staggerItem}
+                        whileHover={{ y: -3 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => handleServiceClick(service.title, service.icon)}
                         aria-label={`Buka layanan ${service.title}`}
-                        className="min-h-[76px] grid grid-cols-[42px_1fr_auto] items-center gap-2.5 p-3 border border-[#dce6f0] rounded-[10px] text-[#75879a] bg-white text-left transition-colors hover:border-[#b9d3ec] hover:shadow-[0_8px_18px_#244d7915]"
+                        className="min-h-[84px] grid grid-cols-[48px_1fr_auto] items-center gap-4 p-4 border border-slate-200 rounded-xl text-slate-600 bg-white text-left transition-all hover:border-[#b9d6f2] hover:shadow-[0_8px_24px_#082d5810] group"
                       >
                         <span
-                          className={`w-[42px] h-[42px] grid place-items-center rounded-[10px] ${
-                            serviceIconStyles[service.icon] ?? "text-blue bg-pale"
+                          className={`w-12 h-12 grid place-items-center rounded-xl ${
+                            serviceIconStyles[service.icon] ?? "text-[#0066cc] bg-[#eaf4ff]"
                           }`}
                         >
-                          <Icon name={service.icon} size={23} />
+                          <Icon name={service.icon} size={24} />
                         </span>
                         <span>
-                          <strong className="block text-[#294158] text-[9.5px]">
+                          <strong className="block text-slate-800 text-[14px] group-hover:text-[#0066cc] transition-colors">
                             {service.title}{" "}
                             {service.tag && (
-                              <em className="ml-[5px] py-0.5 px-1 rounded-[3px] text-[#80631a] bg-[#fff1bd] text-[6px] not-italic uppercase">
+                              <em className="ml-1.5 py-0.5 px-1.5 rounded text-amber-700 bg-amber-100 text-[10px] not-italic uppercase font-bold">
                                 {service.tag}
                               </em>
                             )}
                           </strong>
-                          <small className="block mt-1 text-[#7f8e9d] text-[7.5px]">{service.text}</small>
+                          <small className="block mt-1 text-slate-500 text-[12px] leading-snug">
+                            {service.text}
+                          </small>
                         </span>
-                        <Icon name="arrow" size={16} />
+                        <Icon
+                          name="arrow"
+                          size={18}
+                          className="text-slate-300 group-hover:text-[#0066cc] transition-colors"
+                        />
                       </motion.button>
                     ))}
-                  </div>
+                  </motion.div>
                 </section>
 
-                {/* Informasi Pilihan (Artikel) */}
-                <section className="mt-6">
-                  <div className="flex items-end justify-between mb-[13px]">
+                {/* Artikel */}
+                <section>
+                  <div className="flex items-end justify-between mb-4">
                     <div>
-                      <h2 className="text-navy font-manrope font-bold text-[14px]">Informasi pilihan</h2>
-                      <p className="mt-[3px] text-[#8191a1] text-[8px]">
+                      <h2 className="text-[#082d58] font-manrope font-bold text-lg">Informasi Pilihan</h2>
+                      <p className="mt-1 text-slate-500 text-[13px]">
                         Ringkasan terbaru dari sumber kesehatan kredibel
                       </p>
                     </div>
                     <button
                       onClick={() => setNotice("Semua informasi dibuka")}
-                      className="flex items-center gap-[5px] p-1 border-0 text-blue bg-transparent text-[8px] font-bold hover:underline"
+                      className="flex items-center gap-1 p-1 border-0 text-[#0066cc] bg-transparent text-[13px] font-bold hover:underline"
                     >
                       Lihat semua <Icon name="arrow" size={15} />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-[9px]">
-                    {publicArticles.map((article, idx) => (
+                  <motion.div
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+                  >
+                    {publicArticles.map((article) => (
                       <motion.article
                         key={article.title}
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.35, delay: 0.25 + idx * 0.05 }}
-                        className="p-[15px] border border-[#dce6f0] rounded-[9px] bg-white flex flex-col justify-between hover:border-[#b9d3ec] transition-colors"
+                        variants={staggerItem}
+                        className="p-5 border border-slate-200 rounded-xl bg-white flex flex-col justify-between hover:border-[#b9d6f2] hover:shadow-[0_8px_24px_#082d5810] transition-all group"
                       >
                         <div>
-                          <span className="text-blue text-[6.5px] font-extrabold">{article.type}</span>
-                          <h3 className="sm:min-h-[48px] mt-1.5 text-[#2c4359] font-manrope font-bold text-[9px] leading-[1.45]">
+                          <span className="text-[#0066cc] text-[10px] font-bold uppercase tracking-wider">
+                            {article.type}
+                          </span>
+                          <h3 className="mt-2 text-slate-800 font-manrope font-bold text-[14px] leading-snug group-hover:text-[#0066cc] transition-colors">
                             {article.title}
                           </h3>
-                          <p className="mt-[7px] text-[#8a98a6] text-[6.5px]">{article.source}</p>
+                          <p className="mt-3 text-slate-400 text-[11px] font-medium">
+                            {article.source}
+                          </p>
                         </div>
                         <button
                           onClick={() => setNotice("Artikel dibuka")}
-                          className="flex items-center gap-[5px] mt-[11px] p-0 border-0 text-blue bg-transparent text-[7.5px] font-bold hover:translate-x-0.5 transition-transform w-fit"
+                          className="flex items-center gap-1.5 mt-4 p-0 border-0 text-[#0066cc] bg-transparent text-[12px] font-bold hover:gap-2.5 transition-all w-fit"
                         >
                           Baca artikel <Icon name="arrow" size={14} />
                         </button>
                       </motion.article>
                     ))}
-                  </div>
+                  </motion.div>
                 </section>
               </div>
 
-              {/* Kolom Kanan (Aside) */}
-              <aside className="grid grid-cols-1 md:grid-cols-3 lg:flex lg:flex-col gap-[11px]">
-                {/* Riwayat Skrining */}
-                <section className="p-[17px] border border-[#dce6f0] rounded-[11px] bg-white">
+              {/* Kolom kanan */}
+              <aside className="flex flex-col gap-4 sm:gap-6">
+                {/* Riwayat */}
+                <section className="p-6 border border-slate-200 rounded-xl bg-white shadow-sm">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h2 className="text-navy font-manrope font-bold text-[14px]">Riwayat skrining</h2>
-                      <p className="mt-[3px] text-[#8191a1] text-[8px]">Hasil tersimpan pribadi</p>
+                      <h2 className="text-[#082d58] font-manrope font-bold text-base">Riwayat Skrining</h2>
+                      <p className="mt-1 text-slate-500 text-[12px]">Hasil tersimpan pribadi</p>
                     </div>
-                    <span className="text-blue">
-                      <Icon name="brain" />
+                    <span className="text-[#0066cc]">
+                      <Icon name="brain" size={22} />
                     </span>
                   </div>
 
-                  <div className="pt-[18px] px-[5px] pb-3 text-center">
-                    <span className="w-[42px] h-[42px] grid place-items-center mx-auto rounded-full text-[#728ba3] bg-[#eff4f8]">
-                      <Icon name="book" />
+                  <div className="pt-6 pb-2 text-center">
+                    <span className="w-12 h-12 grid place-items-center mx-auto rounded-full text-slate-400 bg-slate-100">
+                      <Icon name="book" size={22} />
                     </span>
-                    <strong className="block mt-[9px] text-[#344b62] text-[9.5px]">Belum ada hasil tes</strong>
-                    <p className="mt-[5px] mx-auto text-[#8190a0] text-[7.5px] leading-[1.5]">
+                    <strong className="block mt-3 text-slate-800 text-[14px]">
+                      Belum ada hasil tes
+                    </strong>
+                    <p className="mt-1.5 mx-auto text-slate-500 text-[12px] leading-relaxed">
                       Mulai skrining awal untuk memantau kondisi kesehatan mental Anda.
                     </p>
                     <button
                       onClick={() => setNotice("Katalog tes dibuka")}
-                      className="mt-2.5 py-[7px] px-[11px] border border-[#bed3e8] rounded-[5px] text-blue bg-[#f7fbff] text-[7.5px] font-bold hover:bg-pale transition-colors"
+                      className="mt-4 py-2 px-4 border border-[#b9d6f2] rounded-lg text-[#0066cc] bg-[#eaf4ff] text-[12px] font-bold hover:bg-[#d8eaff] transition-colors"
                     >
                       Lihat katalog tes
                     </button>
                   </div>
 
-                  <small className="block pt-[9px] border-t border-[#edf1f5] text-[#8b98a5] text-[6.5px] text-center">
+                  <small className="block pt-4 mt-2 border-t border-slate-100 text-slate-400 text-[11px] text-center">
                     Hasil skrining bukan diagnosis medis.
                   </small>
                 </section>
 
-                {/* Komponen Dokter */}
                 <DoctorSection
                   voiceModeActive={voice}
                   onOpenChat={(docName) => setNotice(`Membuka ruang pesan dengan ${docName}`)}
                 />
 
-                {/* Aksesibilitas Cepat */}
-                <section
-                  className="p-[17px] border border-[#dce6f0] rounded-[11px] bg-white"
-                  aria-labelledby="a11y-quick-title"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 id="a11y-quick-title" className="text-navy font-manrope font-bold text-[14px]">
-                        Aksesibilitas cepat
-                      </h2>
-                      <p className="mt-[3px] text-[#8191a1] text-[8px]">Sesuaikan pengalaman Anda</p>
-                    </div>
-                  </div>
-
-                  <label
-                    htmlFor="toggle-suara"
-                    className="flex items-center justify-between mt-3 text-[#4f657b] text-[8px]"
-                  >
-                    <span className="flex items-center gap-[7px]">
-                      <Icon name="volume" size={17} /> Mode suara
-                    </span>
-                    <button
-                      id="toggle-suara"
-                      role="switch"
-                      aria-checked={voice}
-                      aria-label="Aktifkan atau nonaktifkan mode suara"
-                      onClick={toggleVoice}
-                      className={`relative w-[30px] h-[17px] p-0 border-0 rounded-full transition-colors ${
-                        voice ? "bg-blue" : "bg-[#cbd5df]"
-                      }`}
-                    >
-                      <i
-                        className={`absolute left-[3px] top-[3px] w-[11px] h-[11px] rounded-full bg-white transition-transform duration-200 ${
-                          voice ? "translate-x-[13px]" : ""
-                        }`}
-                      />
-                    </button>
-                  </label>
-
-                  <label
-                    htmlFor="toggle-teks"
-                    className="flex items-center justify-between mt-3 text-[#4f657b] text-[8px]"
-                  >
-                    <span className="flex items-center gap-[7px]">
-                      <Icon name="settings" size={17} /> Teks besar
-                    </span>
-                    <button
-                      id="toggle-teks"
-                      role="switch"
-                      aria-checked={false}
-                      aria-label="Aktifkan atau nonaktifkan teks besar"
-                      onClick={() => setNotice("Mode teks besar siap diterapkan")}
-                      className="relative w-[30px] h-[17px] p-0 border-0 rounded-full bg-[#cbd5df] transition-colors"
-                    >
-                      <i className="absolute left-[3px] top-[3px] w-[11px] h-[11px] rounded-full bg-white transition-transform duration-200" />
-                    </button>
-                  </label>
-
-                  <label
-                    htmlFor="toggle-vibration"
-                    className="flex items-center justify-between mt-3 text-[#4f657b] text-[8px]"
-                  >
-                    <span className="flex items-center gap-[7px]">
-                      <Icon name="bell" size={17} /> Mode getaran
-                    </span>
-                    <button
-                      id="toggle-vibration"
-                      role="switch"
-                      aria-checked={vibration}
-                      aria-label="Aktifkan atau nonaktifkan mode getaran"
-                      onClick={toggleVibration}
-                      className={`relative w-[30px] h-[17px] p-0 border-0 rounded-full transition-colors ${
-                        vibration ? "bg-blue" : "bg-[#cbd5df]"
-                      }`}
-                    >
-                      <i
-                        className={`absolute left-[3px] top-[3px] w-[11px] h-[11px] rounded-full bg-white transition-transform duration-200 ${
-                          vibration ? "translate-x-[13px]" : ""
-                        }`}
-                      />
-                    </button>
-                  </label>
-
-                  <label
-                    htmlFor="select-cb-mode"
-                    className="flex items-center justify-between mt-3 text-[#4f657b] text-[8px]"
-                  >
-                    <span className="flex items-center gap-[7px]">
-                      <Icon name="settings" size={17} /> Mode buta warna
-                    </span>
-                    <select
-                      id="select-cb-mode"
-                      value={cbMode}
-                      onChange={(e) => handleColorBlind(e.target.value as ColorBlindMode)}
-                      aria-label="Pilih mode buta warna"
-                      className="py-1 px-[7px] border border-[#ccd9e5] rounded-[5px] text-[#526a81] bg-[#f8fafc] text-[6.5px] font-bold outline-none focus:border-blue"
-                    >
-                      <option value="normal">Normal</option>
-                      <option value="protanopia">Protanopia (Merah-Hijau)</option>
-                      <option value="deuteranopia">Deuteranopia (Hijau-Merah)</option>
-                      <option value="tritanopia">Tritanopia (Biru-Kuning)</option>
-                    </select>
-                  </label>
-
-                  <button
-                    onClick={() => setNotice("Semua pengaturan dibuka")}
-                    className="w-full mt-3 pt-2 border-0 border-t border-[#edf1f5] text-blue bg-transparent text-[7.5px] font-bold hover:underline"
-                  >
-                    Lihat semua pengaturan
-                  </button>
-                </section>
               </aside>
             </div>
           </main>
         </div>
 
-        {/* Tombol SOS Mengambang */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (vibration) activateVibration([300, 100, 300]);
-            setSos(true);
-          }}
-          aria-label="Tombol SOS bantuan darurat"
-          className="fixed z-35 right-[15px] bottom-[15px] sm:right-6 sm:bottom-[22px] min-h-[48px] flex items-center gap-2 px-[15px] border-[3px] border-[#ffd7da] rounded-full text-white bg-danger shadow-[0_8px_20px_#9f253244] hover:bg-red-700 transition-colors"
-        >
-          <Icon name="phone" size={20} />
-          <span className="text-left">
-            <strong className="block text-[10px]">SOS</strong>
-            <small className="block mt-[1px] text-[6.5px]">Bantuan darurat</small>
-          </span>
-        </motion.button>
-
-        {/* Modal SOS Darurat */}
+        {/* ================= MODAL SOS ================= */}
         <AnimatePresence>
           {sos && (
             <motion.div
@@ -597,7 +467,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
               role="presentation"
               onMouseDown={(e) => e.target === e.currentTarget && setSos(false)}
               onKeyDown={(e) => e.key === "Escape" && setSos(false)}
-              className="fixed inset-0 z-[80] grid place-items-center p-5 bg-[#071a34a6] backdrop-blur-xs"
+              className="fixed inset-0 z-[80] grid place-items-center p-5 bg-slate-900/60 backdrop-blur-sm"
             >
               <motion.section
                 initial={{ opacity: 0, scale: 0.93, y: 12 }}
@@ -607,37 +477,39 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="sos-title"
-                className="relative w-full max-w-[430px] p-[30px] rounded-2xl bg-white shadow-[0_25px_70px_#071a3460] text-center"
+                className="relative w-full max-w-[430px] p-6 sm:p-8 rounded-2xl bg-white shadow-2xl text-center"
               >
                 <button
                   onClick={() => setSos(false)}
                   aria-label="Tutup"
-                  className="absolute right-[14px] top-[14px] w-8 h-8 grid place-items-center border-0 rounded-[7px] text-[#65768a] bg-[#f1f4f8] hover:bg-slate-200 transition-colors"
+                  className="absolute right-4 top-4 w-9 h-9 grid place-items-center border-0 rounded-lg text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors"
                 >
-                  <Icon name="close" />
+                  <Icon name="close" size={18} />
                 </button>
-                <div className="w-14 h-14 grid place-items-center mx-auto mb-[13px] rounded-full text-danger bg-[#ffeaec]">
-                  <Icon name="phone" size={28} />
+                <div className="w-16 h-16 grid place-items-center mx-auto mb-4 rounded-full text-red-600 bg-red-50">
+                  <Icon name="phone" size={32} />
                 </div>
-                <p className="text-danger text-[8px] font-extrabold tracking-[0.12em]">BANTUAN DARURAT</p>
-                <h2 id="sos-title" className="mt-[7px] text-navy font-manrope font-bold text-[21px]">
+                <p className="text-red-600 text-[11px] font-extrabold tracking-widest uppercase">
+                  Bantuan Darurat
+                </p>
+                <h2 id="sos-title" className="mt-2 text-[#082d58] font-manrope font-bold text-2xl">
                   Anda membutuhkan bantuan?
                 </h2>
-                <p className="mt-[7px] text-[#718197] text-[10px]">
+                <p className="mt-2 text-slate-500 text-[13px]">
                   Hubungi layanan darurat nasional atau gunakan simulasi ambulans terdekat.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-[18px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
                   <a
                     href="tel:119"
-                    className="min-h-[41px] flex items-center justify-center gap-[7px] rounded-[7px] text-white bg-danger no-underline text-[9px] font-bold hover:bg-red-700 transition-colors"
+                    className="min-h-[44px] flex items-center justify-center gap-2 rounded-xl text-white bg-red-600 no-underline text-[13px] font-bold hover:bg-red-700 transition-colors shadow-sm"
                   >
-                    <Icon name="phone" /> Telepon 119
+                    <Icon name="phone" size={18} /> Telepon 119
                   </a>
                   <a
                     href="tel:112"
-                    className="min-h-[41px] flex items-center justify-center gap-[7px] rounded-[7px] text-white bg-danger no-underline text-[9px] font-bold hover:bg-red-700 transition-colors"
+                    className="min-h-[44px] flex items-center justify-center gap-2 rounded-xl text-white bg-red-600 no-underline text-[13px] font-bold hover:bg-red-700 transition-colors shadow-sm"
                   >
-                    <Icon name="phone" /> Telepon 112
+                    <Icon name="phone" size={18} /> Telepon 112
                   </a>
                 </div>
                 <button
@@ -645,14 +517,14 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                     setSos(false);
                     setNotice("Simulasi pencarian ambulans dimulai");
                   }}
-                  className="w-full min-h-[43px] flex items-center justify-center gap-2 mt-2 border border-[#bad1eb] rounded-[7px] text-blue bg-[#f5f9ff] text-[9px] font-bold hover:bg-pale transition-colors"
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 mt-3 border border-[#b9d6f2] rounded-xl text-[#0066cc] bg-[#eaf4ff] text-[13px] font-bold hover:bg-[#d8eaff] transition-colors"
                 >
-                  <Icon name="ambulance" /> Cari ambulans terdekat{" "}
-                  <span className="py-[3px] px-[5px] rounded-full text-[#745718] bg-[#fff0bd] text-[6px] uppercase">
+                  <Icon name="ambulance" size={18} /> Cari ambulans terdekat
+                  <span className="py-0.5 px-1.5 rounded text-amber-700 bg-amber-200 text-[10px] uppercase font-bold">
                     Simulasi
                   </span>
                 </button>
-                <small className="block mt-3 text-[#8997a7] text-[7.5px]">
+                <small className="block mt-4 text-slate-400 text-[11px]">
                   Untuk kondisi gawat darurat, segera hubungi 119 atau 112.
                 </small>
               </motion.section>
@@ -660,10 +532,30 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
           )}
         </AnimatePresence>
 
+        {/* ================= MODAL PETA RUMAH SAKIT ================= */}
+        <AnimatePresence>
+          {showNearbyHospitals && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-[9999] flex flex-col bg-[#f3f4f6]"
+            >
+              <div className="flex-1 relative overflow-hidden">
+                <NearbyHospitalsMap 
+                  user={user} 
+                  onNotify={(msg) => setNotice(msg)} 
+                  onBack={() => setShowNearbyHospitals(false)} 
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Modal Fitur Lanjutan */}
         {showChatbot && <ChatbotSheet onClose={() => setShowChatbot(false)} />}
         {showPHQ9 && <PHQ9Screen onClose={() => setShowPHQ9(false)} />}
-        {showHospitalMap && <HospitalMap onClose={() => setShowHospitalMap(false)} />}
         {showChatRoom && (
           <ChatRoom
             userId={user.id}
@@ -673,11 +565,11 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
           />
         )}
 
-        {/* Toast Notifikasi */}
+        {/* Toast */}
         <div
           role="status"
-          className={`fixed z-[100] left-1/2 -translate-x-1/2 w-[calc(100%-30px)] sm:w-auto text-center py-2.5 px-4 rounded-[7px] text-white bg-[#173b63] shadow-[0_8px_25px_#0a234155] text-[9px] transition-all duration-250 ${
-            notice ? "bottom-6 opacity-100" : "-bottom-[70px] opacity-0 pointer-events-none"
+          className={`fixed z-[100] left-1/2 -translate-x-1/2 w-[calc(100%-32px)] sm:w-auto px-5 py-3 rounded-xl text-white bg-slate-800 shadow-xl text-[13px] font-medium text-center transition-all duration-300 ${
+            notice ? "bottom-6 opacity-100 translate-y-0" : "-bottom-16 opacity-0 translate-y-4 pointer-events-none"
           }`}
         >
           {notice}
