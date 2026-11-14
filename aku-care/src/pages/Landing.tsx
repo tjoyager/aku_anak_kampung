@@ -14,7 +14,6 @@ const fadeUp: Variants = {
 
 
 /* -------------------------------------------------------------------------- */
-/*  6 Hero slides — ganti/ tambah gambar cukup di sini                        */
 /* -------------------------------------------------------------------------- */
 type HeroSlide = { src: string; alt: string };
 
