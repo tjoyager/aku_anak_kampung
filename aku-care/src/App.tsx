@@ -504,6 +504,8 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
   const [showMap, setShowMap] = useState(false);
   const [notice, setNotice] = useState("");
   const [dyslexic, setDyslexic] = useState(false);
+  const [largeText, setLargeText] = useState(false);
+  const [vibrationEnabled, setVibrationEnabled] = useState(false);
   const [shakeModalOpen, setShakeModalOpen] = useState(false);
   const [countdown, setCountdown] = useState(3);
 
@@ -523,8 +525,32 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
     };
   }, [dyslexic]);
 
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove("large-text");
+    };
+  }, []);
+
   const toggleDyslexic = () => {
     setDyslexic((prev) => !prev);
+  };
+
+  const toggleLargeText = () => {
+    setLargeText((prev) => {
+      const next = !prev;
+      document.body.classList.toggle("large-text", next);
+      return next;
+    });
+  };
+
+  const toggleVibration = () => {
+    setVibrationEnabled((prev) => {
+      const next = !prev;
+      if (next && "vibrate" in navigator) {
+        navigator.vibrate([100, 50, 100]);
+      }
+      return next;
+    });
   };
 
   useShakeDetection(() => {
@@ -590,7 +616,8 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                 className={index === 0 ? "active" : ""}
                 key={label}
                 onClick={() => {
-                  if (index === 1) setSos(true);
+                  if (index === 0) window.scrollTo({ top: 0, behavior: "smooth" });
+                  else if (index === 1) setSos(true);
                   else if (index === 2) go("tes_mental");
                   else if (index === 3) go("chat");
                   else if (index === 4) go("informasi_detail");
@@ -620,7 +647,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
               <button className={`voice-toggle ${voice ? "active" : ""}`} onClick={toggleVoice}>
                 <Icon name="volume" size={17} /> {voice ? "Suara aktif" : "Mode suara"}
               </button>
-              <button className="icon-only" aria-label="Notifikasi"><Icon name="bell" /></button>
+              <button className="icon-only" aria-label="Notifikasi" onClick={() => setNotice("Belum ada notifikasi baru")}><Icon name="bell" /></button>
               <div className="dash-avatar">{initials}</div>
             </div>
           </header>
@@ -714,11 +741,27 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                   </label>
                   <label>
                     <span><Icon name="settings" size={17} /> Teks besar</span>
-                    <button role="switch" aria-checked="false" className="switch" onClick={() => setNotice("Mode teks besar siap diterapkan")}><i /></button>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={largeText}
+                      className={`switch ${largeText ? "on" : ""}`}
+                      onClick={toggleLargeText}
+                    >
+                      <i />
+                    </button>
                   </label>
                   <label>
                     <span><Icon name="bell" size={17} /> Mode getaran</span>
-                    <button role="switch" aria-checked="false" className="switch" onClick={() => setNotice("Mode getaran siap diterapkan")}><i /></button>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={vibrationEnabled}
+                      className={`switch ${vibrationEnabled ? "on" : ""}`}
+                      onClick={toggleVibration}
+                    >
+                      <i />
+                    </button>
                   </label>
                   <label>
                     <span><Icon name="book" size={17} /> Font Ramah Disleksia</span>
@@ -734,7 +777,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                   </label>
                   <label>
                     <span><Icon name="settings" size={17} /> Mode buta warna</span>
-                    <button className="access-select" onClick={() => setNotice("Pilihan mode warna dibuka")}>Normal</button>
+                    <button className="access-select" onClick={() => go("pengaturan")}>Normal</button>
                   </label>
                   <button className="access-more" onClick={() => go("pengaturan")}>Lihat semua pengaturan</button>
                 </section>
@@ -752,7 +795,16 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
               <h2 id="sos-title">Anda membutuhkan bantuan?</h2>
               <p>Hubungi layanan darurat nasional atau gunakan simulasi ambulans terdekat.</p>
               <div className="emergency-links"><a href="tel:119"><Icon name="phone" /> Telepon 119</a><a href="tel:112"><Icon name="phone" /> Telepon 112</a></div>
-              <button className="simulation-button" onClick={() => { setSos(false); setNotice("Simulasi pencarian ambulans dimulai"); }}><Icon name="ambulance" /> Cari ambulans terdekat <span>Simulasi</span></button>
+              <button
+                type="button"
+                className="simulation-button"
+                onClick={() => {
+                  setSos(false);
+                  setShowMap(true);
+                }}
+              >
+                <Icon name="ambulance" /> Cari ambulans terdekat <span>Simulasi</span>
+              </button>
               <small>Untuk kondisi gawat darurat, segera hubungi 119 atau 112.</small>
             </section>
           </div>

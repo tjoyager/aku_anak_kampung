@@ -320,12 +320,13 @@ export function MentalHealthAndServices({ go, onNotify }: Props) {
               diri.
             </p>
 
-            <button
-              onClick={() => onNotify("Panduan aksesibilitas dibuka")}
+            <a
+              href="#tentang"
+              onClick={() => onNotify("Menampilkan fitur aksesibilitas...")}
               className="mt-7 inline-flex items-center gap-2 px-5 py-3 rounded-xl border-0 bg-navy text-white text-[12px] font-bold shadow-[0_10px_24px_#082d5833] bg-[#062243] hover:-translate-y-px transition-all"
             >
               Pelajari fitur aksesibilitas
-            </button>
+            </a>
           </div>
 
           {/* ---------------- Daftar fitur bernomor ---------------- */}
