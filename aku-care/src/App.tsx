@@ -9,11 +9,16 @@ import { TesMental } from "./TesMental";
 import { Konsultasi } from "./Konsultasi";
 import { Profil } from "./Profil";
 import { Pengaturan } from "./Pengaturan";
+<<<<<<< HEAD
 import { useShakeDetection } from "./hooks/useShakeDetection";
 import Landing from "./pages/Landing";
 import AuthScreen from "./pages/AuthScreen";
 import InformasiDetail from "./pages/InformasiDetail";
 import { A11yWidget } from "./components/A11yWidget";
+=======
+import { Chatbot } from "./Chatbot";
+import { RumahSakit } from "./RumahSakit";
+>>>>>>> a619fda1d6ce49896787bd27eaefab4aa75f0bb0
 
 export type View =
   | "landing"
@@ -27,8 +32,13 @@ export type View =
   | "informasi_detail"
   | "profil"
   | "pengaturan"
+<<<<<<< HEAD
   | "lokasi"
   | "chatbot";
+=======
+  | "chatbot"
+  | "lokasi";
+>>>>>>> a619fda1d6ce49896787bd27eaefab4aa75f0bb0
 
 type IconName =
   | "home" | "heart" | "calendar" | "message" | "book" | "settings"
@@ -526,6 +536,9 @@ export default function App() {
     );
   }
 
+  if (view === "chatbot") return <Chatbot go={setView} />;
+  if (view === "lokasi") return <RumahSakit go={setView} />;
+
   let content;
   if (
     view === "login" ||
@@ -556,10 +569,6 @@ export default function App() {
     content = <TesMental go={setView} />;
   } else if (view === "chat") {
     content = <Konsultasi go={setView} />;
-  } else if (view === "lokasi") {
-    content = <RumahSakit go={setView} />;
-  } else if (view === "chatbot") {
-    content = <Chatbot go={setView} />;
   } else if (view === "informasi_detail") {
     content = <InformasiDetail go={setView} />;
   } else if (view === "profil") {
