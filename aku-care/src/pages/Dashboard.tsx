@@ -14,6 +14,7 @@ import NearbyHospitalsMap from "../RumahSakit";
 import { activateVibration, setColorBlindMode } from "../utils/accessibility";
 import { publicArticles } from "../data/publicArticles";
 import type { View } from "../App";
+import fitur0 from "../assets/fitur-0.png";
 
 type ColorBlindMode = "normal" | "protanopia" | "deuteranopia" | "tritanopia";
 
@@ -300,7 +301,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                 </motion.button>
               </div>
               <img
-                src="/fitur-0.jpg"
+                src={fitur0}
                 alt="Dokter profesional Aku Care"
                 className="absolute z-[1] -right-[40px] sm:right-[20px] -bottom-[40px] w-[220px] h-[300px] object-cover rounded-t-full opacity-30 sm:opacity-100 pointer-events-none"
               />
