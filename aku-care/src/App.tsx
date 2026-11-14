@@ -3,7 +3,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
 import { TalkbackProvider } from "./Talkback";
 import { DoctorSection } from "./Dokter";
-import { Chatbot, ChatbotSheet } from "./Chatbot";
+import { Chatbot } from "./Chatbot";
 import { RumahSakit } from "./RumahSakit";
 import { TesMental } from "./TesMental";
 import { Konsultasi } from "./Konsultasi";
@@ -99,7 +99,6 @@ const dashboardServices: { icon: IconName; title: string; text: string; tag?: st
 function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
   const [voice, setVoice] = useState(false);
   const [sos, setSos] = useState(false);
-  const [showChatbot, setShowChatbot] = useState(false);
   const [notice, setNotice] = useState("");
   const [dyslexic, setDyslexic] = useState(false);
   const [largeText, setLargeText] = useState(false);
@@ -480,7 +479,6 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
             </section>
           </div>
         )}
-        {showChatbot && <ChatbotSheet onClose={() => setShowChatbot(false)} />}
         <div className={`toast ${notice ? "show" : ""}`} role="status">{notice}</div>
       </div>
     </TalkbackProvider>
