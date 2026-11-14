@@ -6,6 +6,12 @@ import { PublicFooter } from "../components/layout/PublicFooter";
 import { NewsAndAnnouncements } from "../components/landing/NewsAndAnnouncements";
 import { MentalHealthAndServices } from "../components/landing/MentalHealthAndServices";
 import type { View } from "../App";
+import fitur0 from "../assets/fitur-0.png";
+import fitur1 from "../assets/fitur-1.png";
+import fitur2 from "../assets/fitur-2.png";
+import fitur3 from "../assets/fitur-3.png";
+import fitur4 from "../assets/fitur-4.png";
+import fitur5 from "../assets/fitur-5.png";
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -19,27 +25,27 @@ type HeroSlide = { src: string; alt: string };
 
 const HERO_SLIDES: HeroSlide[] = [
   {
-    src: "/fitur-0.png",
+    src: fitur0,
     alt: "Dokter profesional yang siap memberikan layanan kesehatan",
   },
   {
-    src: "/fitur-1.png",
+    src: fitur1,
     alt: "Tenaga kesehatan mendampingi pasien dengan empatik",
   },
   {
-    src: "/fitur-2.png",
+    src: fitur2,
     alt: "Tim medis berkolaborasi dalam pelayanan kesehatan inklusif",
   },
   {
-    src: "/fitur-3.png",
+    src: fitur3,
     alt: "Dokter tersenyum hangat melayani pasien",
   },
   {
-    src: "/fitur-4.png",
+    src: fitur4,
     alt: "Perawat ramah membantu pasien lansia",
   },
   {
-    src: "/fitur-5.png",
+    src: fitur5,
     alt: "Konsultasi kesehatan jarak jauh yang mudah diakses",
   },
 ];
