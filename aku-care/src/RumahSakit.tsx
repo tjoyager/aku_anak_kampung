@@ -174,3 +174,25 @@ export default function NearbyHospitalsMap() {
     </div>
   );
 }
+
+export function RumahSakit({ go }: { go?: (view: any) => void }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column' }}>
+      <header style={{ padding: '16px 20px', backgroundColor: '#0d9488', color: 'white', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+        <button 
+          onClick={() => (go ? go("landing") : window.history.back())} 
+          style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '14px', padding: 0 }}
+        >
+          <span style={{ transform: 'rotate(180deg)', display: 'inline-block', marginRight: '8px' }}>
+            →
+          </span> 
+          Kembali ke Beranda
+        </button>
+        <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>Fasilitas Kesehatan Terdekat</h2>
+      </header>
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <NearbyHospitalsMap />
+      </div>
+    </div>
+  );
+}

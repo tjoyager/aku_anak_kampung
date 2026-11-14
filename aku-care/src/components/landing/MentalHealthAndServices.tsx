@@ -5,6 +5,7 @@ import type { View } from "../../App";
 interface Props {
   go: (view: View) => void;
   onNotify: (msg: string) => void;
+  setSos?: (sos: boolean) => void;
 }
 
 /* ---------------------------------------------------------------- */
@@ -45,7 +46,7 @@ const a11yLabel = {
   multi: "Multikanal",
 } as const;
 
-export function MentalHealthAndServices({ go, onNotify }: Props) {
+export function MentalHealthAndServices({ go, onNotify, setSos }: Props) {
   return (
     <>
       {/* ================================================================ */}
@@ -262,16 +263,19 @@ export function MentalHealthAndServices({ go, onNotify }: Props) {
                 {/* CTA */}
                 <button
                   onClick={() => {
-                    if (service.title === "Lokasi Layanan Kesehatan") go("dashboard");
+                    if (service.title === "Lokasi Layanan Kesehatan") go("lokasi");
                     else if (service.title === "Tes Kesehatan Mental") go("tes_mental");
                     else if (service.title === "Konsultasi Dokter") go("chat");
-                    else if (service.title === "Layanan Darurat") window.location.href = "tel:119";
-                    else if (service.title === "Chatbot Pendamping") go("dashboard");
-                    else go("login");
+                    else if (service.title === "Layanan Darurat") {
+                      if (setSos) setSos(true);
+                      else window.location.href = "tel:119";
+                    }
+                    else if (service.title === "Chatbot Pendamping") go("chatbot");
+                    else go("profil");
                   }}
                   className="mt-5 self-start inline-flex items-center gap-1.5 text-blue text-[11.5px] font-bold hover:gap-2.5 transition-all"
                 >
-                  {service.title === "Tes Kesehatan Mental" ? "Mulai Skrining (PHQ-9)" : service.title === "Konsultasi Dokter" ? "Mulai Konsultasi" : service.title === "Layanan Darurat" ? "Hubungi 119" : "Akses Layanan"}
+                  {service.title === "Tes Kesehatan Mental" ? "Mulai Skrining (PHQ-9)" : service.title === "Konsultasi Dokter" ? "Mulai Konsultasi" : service.title === "Layanan Darurat" ? "Hubungi 119" : service.title === "Lokasi Layanan Kesehatan" ? "Cari Faskes Terdekat" : service.title === "Chatbot Pendamping" ? "Buka Chatbot" : "Akses Layanan"}
                   <span aria-hidden="true" className="text-[13px] leading-none">→</span>
                 </button>
               </motion.article>

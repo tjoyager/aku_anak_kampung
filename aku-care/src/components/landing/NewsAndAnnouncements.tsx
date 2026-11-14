@@ -52,7 +52,8 @@ export function NewsAndAnnouncements({ go, onNotify }: Props) {
           <motion.article
             whileHover={{ y: -4 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="group overflow-hidden rounded-2xl border border-[#dce6f0] bg-white shadow-[0_2px_10px_#0b3a6b0d] hover:shadow-[0_16px_40px_#0b3a6b1f] hover:border-[#b9d3ec] transition-all"
+            onClick={() => go("informasi_detail")}
+            className="group overflow-hidden rounded-2xl border border-[#dce6f0] bg-white shadow-[0_2px_10px_#0b3a6b0d] hover:shadow-[0_16px_40px_#0b3a6b1f] hover:border-[#b9d3ec] transition-all cursor-pointer"
           >
             <div className="relative aspect-[16/9] sm:aspect-[16/8] overflow-hidden bg-[#e3f2fc]">
               <img
@@ -104,7 +105,8 @@ export function NewsAndAnnouncements({ go, onNotify }: Props) {
             {publicArticles.map((article, idx) => (
               <article
                 key={article.title}
-                className={`group flex gap-4 p-4 sm:p-5 hover:bg-[#f8fbff] transition-colors ${
+                onClick={() => go("informasi_detail")}
+                className={`group flex gap-4 p-4 sm:p-5 hover:bg-[#f8fbff] transition-colors cursor-pointer ${
                   idx > 0 ? "border-t border-[#edf1f5]" : ""
                 }`}
               >

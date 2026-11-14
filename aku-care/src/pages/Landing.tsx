@@ -50,6 +50,7 @@ const SLIDE_INTERVAL = 3000; // ms
 export default function Landing({ go }: { go: (view: View) => void }) {
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const [sos, setSos] = useState(false);
 
   /* --------------------------- Hero carousel state -------------------------- */
   const [activeSlide, setActiveSlide] = useState(0);
@@ -83,11 +84,7 @@ export default function Landing({ go }: { go: (view: View) => void }) {
 
   const search = (event: FormEvent) => {
     event.preventDefault();
-    setNotice(
-      query
-        ? `Menampilkan hasil pencarian untuk: ${query}`
-        : "Masukkan kata kunci pencarian."
-    );
+    go("informasi_detail");
   };
 
   const popularTopics = useMemo(
@@ -203,7 +200,10 @@ export default function Landing({ go }: { go: (view: View) => void }) {
                   <button
                     key={topic}
                     type="button"
-                    onClick={() => setQuery(topic)}
+                    onClick={() => {
+                      setQuery(topic);
+                      go("informasi_detail");
+                    }}
                     className="px-2.5 py-1 rounded-full border border-[#d5e3f0] text-[#3d6e9d] bg-white/70 text-[9.5px] hover:border-blue hover:text-blue hover:bg-[#eaf4ff] transition-colors"
                   >
                     {topic}
@@ -345,10 +345,37 @@ export default function Landing({ go }: { go: (view: View) => void }) {
 
         {/* --------------------------- Modular Sections -------------------------- */}
         <NewsAndAnnouncements go={go} onNotify={setNotice} />
-        <MentalHealthAndServices go={go} onNotify={setNotice} />
+        <MentalHealthAndServices go={go} onNotify={setNotice} setSos={setSos} />
       </main>
 
       <PublicFooter />
+
+      {/* -------------------------------- Modal SOS ---------------------------- */}
+      {sos && (
+        <div className="fixed inset-0 z-[100] grid place-items-center p-4 bg-black/60 backdrop-blur-xs" onMouseDown={(e) => e.target === e.currentTarget && setSos(false)}>
+          <section className="relative w-full max-w-[420px] p-6 rounded-2xl bg-white shadow-2xl text-center" role="dialog" aria-modal="true" aria-labelledby="landing-sos-title">
+            <button className="absolute right-3 top-3 w-8 h-8 grid place-items-center rounded-lg border-0 bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer" onClick={() => setSos(false)} aria-label="Tutup">✕</button>
+            <div className="w-14 h-14 grid place-items-center mx-auto mb-3 rounded-full text-red-600 bg-red-100 font-bold text-2xl">📞</div>
+            <p className="text-red-600 font-extrabold text-[10px] tracking-widest uppercase">BANTUAN DARURAT</p>
+            <h2 id="landing-sos-title" className="text-xl font-bold text-slate-900 mt-1 mb-2">Anda membutuhkan bantuan?</h2>
+            <p className="text-sm text-slate-600 mb-4">Hubungi layanan darurat nasional atau cari ambulans dan fasilitas kesehatan terdekat.</p>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <a href="tel:119" className="py-2.5 px-4 rounded-lg bg-red-600 text-white font-bold text-sm text-center no-underline hover:bg-red-700">Telepon 119</a>
+              <a href="tel:112" className="py-2.5 px-4 rounded-lg bg-red-600 text-white font-bold text-sm text-center no-underline hover:bg-red-700">Telepon 112</a>
+            </div>
+            <button
+              type="button"
+              className="w-full py-2.5 px-4 rounded-lg border border-blue-300 bg-blue-50 text-blue font-bold text-sm hover:bg-blue-100 cursor-pointer"
+              onClick={() => {
+                setSos(false);
+                go("lokasi");
+              }}
+            >
+              🚑 Cari faskes &amp; ambulans terdekat
+            </button>
+          </section>
+        </div>
+      )}
 
       {/* -------------------------------- Toast -------------------------------- */}
       <div

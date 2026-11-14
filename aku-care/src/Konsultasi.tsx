@@ -23,8 +23,14 @@ interface Message {
 export function Konsultasi({
   go,
   doctorName = "dr. Ratna Wijaya, Sp.KJ",
-  specialty = "Spesialis Kedokteran Jiwa (Psikiater)",
+  specialty = "Spesialis Kesehatan Jiwa",
 }: KonsultasiProps) {
+  const [selectedDoctor, setSelectedDoctor] = useState({
+    name: doctorName,
+    specialty: specialty,
+    initial: "RW",
+    sip: "SIP. 503/442/DS/2024",
+  });
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -123,24 +129,78 @@ export function Konsultasi({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#0066cc", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "16px" }}>
-            RW
+            {selectedDoctor.initial}
           </div>
           <div>
-            <h2 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#0f172a" }}>{doctorName}</h2>
+            <h2 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#0f172a" }}>{selectedDoctor.name}</h2>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#64748b" }}>
               <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#16a34a", display: "inline-block" }} />
-              <span>{specialty} · Online</span>
+              <span>{selectedDoctor.specialty} · Online ({selectedDoctor.sip})</span>
             </div>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => go("dashboard")}
-          style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#ffffff", color: "#334155", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
-        >
-          ← Kembali ke Dashboard
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            type="button"
+            onClick={() => go("landing")}
+            style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#ffffff", color: "#475569", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
+          >
+            Beranda
+          </button>
+          <button
+            type="button"
+            onClick={() => go("dashboard")}
+            style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid #0066cc", background: "#eff6ff", color: "#0066cc", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
+          >
+            Dashboard
+          </button>
+        </div>
+      </div>
+
+      {/* Banner Penjelasan Konsultasi & Profil Dokter Terverifikasi */}
+      <div style={{ background: "#eff6ff", borderBottom: "1px solid #bfdbfe", padding: "10px 20px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "10px", fontSize: "12px", color: "#1e40af" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "18px" }}>🩺</span>
+          <span>
+            Pasien sedang berkonsultasi langsung dengan <strong>dr. Ratna Wijaya, Sp.KJ (Spesialis Kesehatan Jiwa)</strong>. Sesi konsultasi aktif &amp; terenkripsi.
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "11px", color: "#3b82f6", fontWeight: "600" }}>Pilih Dokter:</span>
+          <select
+            value={selectedDoctor.name}
+            onChange={(e) => {
+              if (e.target.value.includes("Ratna")) {
+                setSelectedDoctor({
+                  name: "dr. Ratna Wijaya, Sp.KJ",
+                  specialty: "Spesialis Kesehatan Jiwa",
+                  initial: "RW",
+                  sip: "SIP. 503/442/DS/2024",
+                });
+              } else if (e.target.value.includes("Budi")) {
+                setSelectedDoctor({
+                  name: "dr. Budi Santoso, Sp.A",
+                  specialty: "Spesialis Anak",
+                  initial: "BS",
+                  sip: "SIP. 503/388/DS/2023",
+                });
+              } else {
+                setSelectedDoctor({
+                  name: "dr. Hendra Setiawan, Sp.PD",
+                  specialty: "Spesialis Penyakit Dalam",
+                  initial: "HS",
+                  sip: "SIP. 503/102/DS/2022",
+                });
+              }
+            }}
+            style={{ fontSize: "11px", padding: "4px 8px", borderRadius: "6px", border: "1px solid #93c5fd", background: "#ffffff", color: "#1e3a8a", fontWeight: "600", outline: "none", cursor: "pointer" }}
+          >
+            <option value="dr. Ratna Wijaya, Sp.KJ">dr. Ratna Wijaya, Sp.KJ (Spesialis Jiwa)</option>
+            <option value="dr. Budi Santoso, Sp.A">dr. Budi Santoso, Sp.A (Spesialis Anak)</option>
+            <option value="dr. Hendra Setiawan, Sp.PD">dr. Hendra Setiawan, Sp.PD (Penyakit Dalam)</option>
+          </select>
+        </div>
       </div>
 
       {/* Area Chat Messages */}

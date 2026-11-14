@@ -3,8 +3,8 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
 import { TalkbackProvider } from "./Talkback";
 import { DoctorSection } from "./Dokter";
-import { ChatbotSheet } from "./Chatbot";
-import NearbyHospitalsMap from "./RumahSakit";
+import { Chatbot, ChatbotSheet } from "./Chatbot";
+import NearbyHospitalsMap, { RumahSakit } from "./RumahSakit";
 import { TesMental } from "./TesMental";
 import { Konsultasi } from "./Konsultasi";
 import { Profil } from "./Profil";
@@ -13,7 +13,20 @@ import { useShakeDetection } from "./hooks/useShakeDetection";
 import Landing from "./pages/Landing";
 import { A11yWidget } from "./components/A11yWidget"; // <-- Import yang hilang
 
-export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat" | "informasi_detail" | "profil" | "pengaturan";
+export type View =
+  | "landing"
+  | "login"
+  | "register"
+  | "forgot"
+  | "update_password"
+  | "dashboard"
+  | "tes_mental"
+  | "chat"
+  | "informasi_detail"
+  | "profil"
+  | "pengaturan"
+  | "lokasi"
+  | "chatbot";
 
 type IconName =
   | "home" | "heart" | "calendar" | "message" | "book" | "settings"
@@ -439,8 +452,24 @@ function AuthScreen({
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={isRegister || isUpdate ? "Minimal 6 karakter" : "Masukkan kata sandi"}
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? "Sembunyikan" : "Lihat"}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                    title={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                    style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+                  >
+                    {showPassword ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
                   </button>
                 </div>
               </label>
@@ -950,6 +979,10 @@ export default function App() {
     content = <TesMental go={setView} />;
   } else if (view === "chat") {
     content = <Konsultasi go={setView} />;
+  } else if (view === "lokasi") {
+    content = <RumahSakit go={setView} />;
+  } else if (view === "chatbot") {
+    content = <Chatbot go={setView} />;
   } else if (view === "informasi_detail") {
     content = <InformasiDetail go={setView} />;
   } else if (view === "profil") {
