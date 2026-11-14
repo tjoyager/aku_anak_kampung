@@ -92,9 +92,11 @@ export function ChatbotSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      <div 
-        style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100 }} 
-        onClick={onClose} 
+      <div
+        role="presentation"
+        style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100 }}
+        onClick={onClose}
+        onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}
       />
       
       <div 
