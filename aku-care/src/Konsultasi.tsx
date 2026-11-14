@@ -143,13 +143,6 @@ export function Konsultasi({
         <div style={{ display: "flex", gap: "8px" }}>
           <button
             type="button"
-            onClick={() => go("landing")}
-            style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#ffffff", color: "#475569", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
-          >
-            Beranda
-          </button>
-          <button
-            type="button"
             onClick={() => go("dashboard")}
             style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid #0066cc", background: "#eff6ff", color: "#0066cc", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
           >
