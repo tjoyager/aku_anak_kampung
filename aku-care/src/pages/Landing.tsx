@@ -20,27 +20,27 @@ type HeroSlide = { src: string; alt: string };
 
 const HERO_SLIDES: HeroSlide[] = [
   {
-    src: "/fitur-0.jpg",
+    src: "/fitur-0.jpeg",
     alt: "Dokter profesional yang siap memberikan layanan kesehatan",
   },
   {
-    src: "/fitur-1.jpg",
+    src: "/fitur-1.jpeg",
     alt: "Tenaga kesehatan mendampingi pasien dengan empatik",
   },
   {
-    src: "/fitur-2.jpg",
+    src: "/fitur-2.jpeg",
     alt: "Tim medis berkolaborasi dalam pelayanan kesehatan inklusif",
   },
   {
-    src: "/fitur-3.jpg",
+    src: "/fitur-3.jpeg",
     alt: "Dokter tersenyum hangat melayani pasien",
   },
   {
-    src: "/fitur-4.jpg",
+    src: "/fitur-4.jpeg",
     alt: "Perawat ramah membantu pasien lansia",
   },
   {
-    src: "/fitur-5.jpg",
+    src: "/fitur-5.jpeg",
     alt: "Konsultasi kesehatan jarak jauh yang mudah diakses",
   },
 ];
