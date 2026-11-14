@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from "react";
+import Dashboard from "./pages/Dashboard";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
 import { TalkbackProvider } from "./Talkback";

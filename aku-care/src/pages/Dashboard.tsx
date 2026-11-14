@@ -662,15 +662,31 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
 
         {/* Modal Fitur Lanjutan */}
         {showChatbot && <ChatbotSheet onClose={() => setShowChatbot(false)} />}
-        {showPHQ9 && <PHQ9Screen onClose={() => setShowPHQ9(false)} />}
-        {showHospitalMap && <HospitalMap onClose={() => setShowHospitalMap(false)} />}
+        
+        {/* WRAPPER PETA RUMAH SAKIT */}
+        {showHospitalMap && (
+          <div className="fixed inset-0 z-[90] bg-gray-50 flex flex-col">
+            <HospitalMap onClose={() => setShowHospitalMap(false)} />
+          </div>
+        )}
+
+        {/* WRAPPER TES MENTAL PHQ-9 */}
+        {showPHQ9 && (
+          <div className="fixed inset-0 z-[90] bg-gray-50 overflow-y-auto">
+            <PHQ9Screen onClose={() => setShowPHQ9(false)} />
+          </div>
+        )}
+
+        {/* WRAPPER RUANG CHAT */}
         {showChatRoom && (
-          <ChatRoom
-            userId={user.id}
-            displayName={displayName}
-            channelName={`chat_${user.id}`}
-            onClose={() => setShowChatRoom(false)}
-          />
+          <div className="fixed inset-0 z-[90] bg-gray-50 flex flex-col">
+            <ChatRoom
+              userId={user.id}
+              displayName={displayName}
+              channelName={`chat_${user.id}`}
+              onClose={() => setShowChatRoom(false)}
+            />
+          </div>
         )}
 
         {/* Toast Notifikasi */}
