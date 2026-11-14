@@ -6,6 +6,10 @@
   font-family: 'OpenDyslexic', sans-serif !important;
 }
 
+.large-text {
+  font-size: 1.15em !important;
+}
+
 :root {
   --blue: #0066cc;
   --blue-dark: #073b72;

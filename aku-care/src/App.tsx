@@ -10,8 +10,8 @@ import { TesMental } from "./TesMental";
 import { Konsultasi } from "./Konsultasi";
 import { useShakeDetection } from "./hooks/useShakeDetection";
 
-// 1. Tipe View diperbarui untuk form lupa sandi, tes mental, dan konsultasi chat
-export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat";
+// 1. Tipe View diperbarui untuk form lupa sandi, tes mental, konsultasi chat, dan detail informasi
+export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat" | "informasi_detail";
 type IconName =
   | "home" | "heart" | "calendar" | "message" | "book" | "settings"
   | "bell" | "search" | "hospital" | "brain" | "doctor" | "ambulance"
@@ -75,16 +75,51 @@ const publicArticles = [
   { type: "Gizi", title: "Memahami pola gizi seimbang untuk keluarga", summary: "Ringkasan praktis mengenai variasi makanan, porsi, dan kebiasaan makan sehat.", source: "Sumber: Kementerian Kesehatan RI", date: "4 Nov 2026", theme: "nutrition" },
 ];
 
-function PublicHeader({ go }: { go: (view: View) => void }) {
+function PublicHeader({ go, onNotice }: { go: (view: View) => void; onNotice?: (msg: string) => void }) {
+  const [voiceActive, setVoiceActive] = useState(false);
+  const [largeText, setLargeText] = useState(false);
+
+  const toggleVoice = () => {
+    const next = !voiceActive;
+    setVoiceActive(next);
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      if (next) {
+        const utterance = new SpeechSynthesisUtterance("Mode suara diaktifkan. Selamat datang di portal kesehatan inklusif Aku Care.");
+        utterance.lang = "id-ID";
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+    onNotice?.(next ? "Mode Suara diaktifkan (Web Speech API)" : "Mode Suara dinonaktifkan");
+  };
+
+  const toggleTextSize = () => {
+    const next = !largeText;
+    setLargeText(next);
+    document.body.classList.toggle("large-text", next);
+    onNotice?.(next ? "Ukuran teks diperbesar (A+)" : "Ukuran teks kembali normal");
+  };
+
+  const toggleDyslexic = () => {
+    const isDyslexic = document.body.classList.toggle("font-dyslexic");
+    onNotice?.(isDyslexic ? "Font ramah disleksia diaktifkan" : "Font kembali normal");
+  };
+
   return (
     <>
       <div className="gov-strip">
         <div>
           <span>Portal Informasi Kesehatan Inklusif</span>
           <span className="gov-meta">Bahasa Indonesia</span>
-          <button><Icon name="volume" size={15} /> Mode Suara</button>
-          <button type="button" onClick={() => document.body.classList.toggle("font-dyslexic")}><Icon name="book" size={15} /> Font Disleksia</button>
-          <button>Ukuran Teks A+</button>
+          <button type="button" onClick={toggleVoice} style={voiceActive ? { background: "#0284c7", color: "#fff" } : undefined}>
+            <Icon name="volume" size={15} /> {voiceActive ? "Suara Aktif" : "Mode Suara"}
+          </button>
+          <button type="button" onClick={toggleDyslexic}>
+            <Icon name="book" size={15} /> Font Disleksia
+          </button>
+          <button type="button" onClick={toggleTextSize} style={largeText ? { background: "#0284c7", color: "#fff" } : undefined}>
+            Ukuran Teks {largeText ? "Normal" : "A+"}
+          </button>
         </div>
       </div>
       <header className="public-header">
@@ -111,14 +146,26 @@ function PublicHeader({ go }: { go: (view: View) => void }) {
 function Landing({ go }: { go: (view: View) => void }) {
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const [sos, setSos] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [showAccessModal, setShowAccessModal] = useState(false);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timeout = window.setTimeout(() => setNotice(""), 3000);
+    return () => clearTimeout(timeout);
+  }, [notice]);
+
   const search = (event: FormEvent) => {
     event.preventDefault();
-    setNotice(query ? `Menampilkan pencarian untuk “${query}”` : "Masukkan kata kunci pencarian.");
+    setNotice(query ? `Menampilkan hasil pencarian untuk: ${query}` : "Masukkan kata kunci pencarian.");
   };
+
   return (
     <div className="public-page">
       <a className="skip-link" href="#main-public">Lewati ke konten utama</a>
-      <PublicHeader go={go} />
+      <PublicHeader go={go} onNotice={setNotice} />
       <main id="main-public">
         <section className="public-hero" id="beranda">
           <div className="public-hero-inner">
@@ -165,7 +212,7 @@ function Landing({ go }: { go: (view: View) => void }) {
               <h2>Berita & edukasi kesehatan</h2>
               <p>Ringkasan informasi kesehatan untuk masyarakat dari sumber tepercaya.</p>
             </div>
-            <button onClick={() => setNotice("Semua artikel ditampilkan")}>Lihat semua informasi <Icon name="arrow" size={17} /></button>
+            <button onClick={() => go("informasi_detail")}>Lihat semua informasi <Icon name="arrow" size={17} /></button>
           </div>
           <div className="news-layout">
             <article className="featured-news">
@@ -175,7 +222,7 @@ function Landing({ go }: { go: (view: View) => void }) {
                 <h3>Akses kesehatan yang inklusif dimulai dari informasi yang mudah dipahami</h3>
                 <p>Pelajari prinsip layanan kesehatan yang setara bagi penyandang disabilitas dan masyarakat umum.</p>
                 <small>Sumber: Kementerian Kesehatan RI</small>
-                <button onClick={() => setNotice("Artikel utama dibuka")}>Baca selengkapnya <Icon name="arrow" size={16} /></button>
+                <button onClick={() => go("informasi_detail")}>Baca selengkapnya <Icon name="arrow" size={16} /></button>
               </div>
             </article>
             <div className="news-list">
@@ -187,6 +234,9 @@ function Landing({ go }: { go: (view: View) => void }) {
                     <h3>{article.title}</h3>
                     <p>{article.summary}</p>
                     <small>{article.source}</small>
+                    <button type="button" onClick={() => go("informasi_detail")} style={{ background: "none", border: "none", color: "#0066cc", padding: 0, marginTop: "6px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "13px", fontWeight: 600 }}>
+                      Baca artikel <Icon name="arrow" size={13} />
+                    </button>
                   </div>
                 </article>
               ))}
@@ -204,13 +254,13 @@ function Landing({ go }: { go: (view: View) => void }) {
               <span className="doc-type">PENGUMUMAN</span><time>7 November 2026</time>
               <h3>Informasi simulasi layanan ambulans pada versi demonstrasi</h3>
               <p>Permintaan dan pergerakan ambulans di Aku Care bersifat simulasi. Untuk kondisi darurat nyata, hubungi 119 atau 112.</p>
-              <button onClick={() => setNotice("Pengumuman dibuka")}>Lihat pengumuman <Icon name="arrow" size={15} /></button>
+              <button onClick={() => go("informasi_detail")}>Lihat pengumuman <Icon name="arrow" size={15} /></button>
             </article>
             <article>
               <span className="doc-type release">SIARAN PERS</span><time>5 November 2026</time>
               <h3>Penguatan akses informasi kesehatan bagi penyandang disabilitas</h3>
               <p>Komitmen menghadirkan informasi dalam bentuk teks, suara, visual, dan navigasi yang aksesibel.</p>
-              <button onClick={() => setNotice("Siaran pers dibuka")}>Baca siaran pers <Icon name="arrow" size={15} /></button>
+              <button onClick={() => go("informasi_detail")}>Baca siaran pers <Icon name="arrow" size={15} /></button>
             </article>
             <aside>
               <strong>Jangan lewatkan informasi terbaru</strong>
@@ -227,15 +277,15 @@ function Landing({ go }: { go: (view: View) => void }) {
               <h2>Ruang aman untuk memahami kondisi mental Anda.</h2>
               <p>Lakukan skrining awal dengan bahasa yang netral dan tidak menghakimi, pantau perkembangan, lalu konsultasikan hasilnya kepada dokter atau psikolog pilihan Anda.</p>
               <div className="mental-actions">
-                <button className="mental-primary" onClick={() => go("login")}>Akses layanan kesehatan mental <Icon name="arrow" size={17} /></button>
-                <button className="mental-secondary" onClick={() => setNotice("Informasi tes kesehatan mental dibuka")}>Pelajari jenis tes</button>
+                <button className="mental-primary" onClick={() => go("tes_mental")}>Mulai Tes Mental (PHQ-9) <Icon name="arrow" size={17} /></button>
+                <button className="mental-secondary" onClick={() => go("tes_mental")}>Pelajari jenis tes</button>
               </div>
               <small>Hasil tes merupakan skrining awal, bukan diagnosis atau pengganti penilaian profesional.</small>
             </div>
             <div className="mental-service-panel">
               <div className="mental-panel-head">
                 <span><Icon name="shield" size={16} /> Privat & terkendali</span>
-                <span className="mental-lock"><Icon name="lock" size={12} /> Perlu masuk</span>
+                <span className="mental-lock" style={{ background: "#ecfdf5", color: "#059669" }}>Skrining Siap Digunakan</span>
               </div>
               <div className="mental-options">
                 <article><span className="mental-option-icon"><Icon name="brain" size={21} /></span><div><strong>Skrining terstandar</strong><p>PHQ-9, GAD-7, DASS-21, dan kepribadian Big Five.</p></div></article>
@@ -255,27 +305,61 @@ function Landing({ go }: { go: (view: View) => void }) {
           <div className="public-section">
             <div className="section-title-row centered">
               <div>
-                <span className="section-kicker">LAYANAN Aku CARE</span>
+                <span className="section-kicker">LAYANAN AKU CARE</span>
                 <h2>Satu akses untuk kebutuhan kesehatan Anda</h2>
-                <p>Masuk atau daftar untuk menggunakan layanan personal dengan aman.</p>
+                <p>Akses langsung fasilitas darurat, peta kesehatan, tes mental, atau masuk untuk profil pribadi.</p>
               </div>
             </div>
             <div className="locked-grid">
-              {guestServices.map((service) => (
-                <article key={service.title} className="locked-service">
-                  <div className="locked-top"><span className="service-symbol"><Icon name={service.icon} size={25} /></span><span className="lock-badge"><Icon name="lock" size={13} /> Perlu masuk</span></div>
-                  <h3>{service.title}</h3>
-                  <p>{service.text}</p>
-                  <button onClick={() => go("login")}>Masuk untuk mengakses <Icon name="arrow" size={15} /></button>
-                </article>
-              ))}
+              {guestServices.map((service) => {
+                let action = () => go("login");
+                let buttonLabel = "Masuk untuk mengakses";
+                let isLocked = true;
+
+                if (service.title === "Lokasi Layanan Kesehatan") {
+                  action = () => setShowMap(true);
+                  buttonLabel = "Buka Peta Fasilitas";
+                  isLocked = false;
+                } else if (service.title === "Tes Kesehatan Mental") {
+                  action = () => go("tes_mental");
+                  buttonLabel = "Mulai Skrining (PHQ-9)";
+                  isLocked = false;
+                } else if (service.title === "Konsultasi Dokter") {
+                  action = () => go("chat");
+                  buttonLabel = "Konsultasi Dokter";
+                  isLocked = false;
+                } else if (service.title === "Layanan Darurat") {
+                  action = () => setSos(true);
+                  buttonLabel = "Bantuan Darurat SOS";
+                  isLocked = false;
+                } else if (service.title === "Chatbot Pendamping") {
+                  action = () => setShowChatbot(true);
+                  buttonLabel = "Tanya Chatbot";
+                  isLocked = false;
+                } else {
+                  action = () => go("login");
+                  buttonLabel = "Masuk untuk Mengakses";
+                  isLocked = true;
+                }
+
+                return (
+                  <article key={service.title} className="locked-service">
+                    <div className="locked-top">
+                      <span className="service-symbol"><Icon name={service.icon} size={25} /></span>
+                      {isLocked ? (
+                        <span className="lock-badge"><Icon name="lock" size={13} /> Perlu masuk</span>
+                      ) : (
+                        <span className="lock-badge" style={{ background: "#ecfdf5", color: "#059669", border: "1px solid #a7f3d0" }}>Akses Terbuka</span>
+                      )}
+                    </div>
+                    <h3>{service.title}</h3>
+                    <p>{service.text}</p>
+                    <button onClick={action}>{buttonLabel} <Icon name="arrow" size={15} /></button>
+                  </article>
+                );
+              })}
             </div>
           </div>
-        </section>
-
-        <section id="pengumuman" className="public-section">
-          <h2>Pengumuman & Siaran Pers</h2>
-          <p>Belum ada pengumuman saat ini.</p>
         </section>
 
         <section className="accessibility-public" id="tentang">
@@ -284,7 +368,7 @@ function Landing({ go }: { go: (view: View) => void }) {
               <span className="section-kicker">AKSESIBILITAS SEBAGAI FONDASI</span>
               <h2>Dirancang untuk digunakan secara mandiri.</h2>
               <p>Aku Care mendukung mode suara, getaran dengan indikator visual, pilihan mode buta warna, kontras tinggi, ukuran teks, dan navigasi keyboard.</p>
-              <button onClick={() => setNotice("Panduan aksesibilitas dibuka")}>Pelajari fitur aksesibilitas</button>
+              <button onClick={() => setShowAccessModal(true)}>Pelajari fitur aksesibilitas</button>
             </div>
             <div className="access-features">
               <div><Icon name="volume" /><span><strong>Mode Suara</strong><small>Panduan berbahasa Indonesia</small></span></div>
@@ -294,6 +378,7 @@ function Landing({ go }: { go: (view: View) => void }) {
           </div>
         </section>
       </main>
+
       <footer className="public-footer">
         <div>
           <Brand light />
@@ -304,7 +389,229 @@ function Landing({ go }: { go: (view: View) => void }) {
           <small>Aku Care · Informasi pada situs ini bukan pengganti diagnosis atau konsultasi tenaga medis.</small>
         </div>
       </footer>
+
+      {/* Floating SOS button */}
+      <button className="sos-floating" onClick={() => setSos(true)} aria-label="Bantuan darurat SOS">
+        <Icon name="phone" size={20} />
+        <span><strong>SOS</strong><small>Bantuan darurat</small></span>
+      </button>
+
+      {/* SOS Modal */}
+      {sos && (
+        <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setSos(false)}>
+          <section className="sos-modal" role="dialog" aria-modal="true" aria-labelledby="landing-sos-title">
+            <button className="modal-close" onClick={() => setSos(false)} aria-label="Tutup"><Icon name="close" /></button>
+            <div className="sos-modal-icon"><Icon name="phone" size={28} /></div>
+            <p className="modal-kicker">BANTUAN DARURAT</p>
+            <h2 id="landing-sos-title">Anda membutuhkan bantuan?</h2>
+            <p>Hubungi layanan darurat nasional atau gunakan simulasi ambulans terdekat.</p>
+            <div className="emergency-links">
+              <a href="tel:119"><Icon name="phone" /> Telepon 119</a>
+              <a href="tel:112"><Icon name="phone" /> Telepon 112</a>
+            </div>
+            <button className="simulation-button" onClick={() => { setSos(false); setNotice("Simulasi pencarian ambulans dimulai"); }}>
+              <Icon name="ambulance" /> Cari ambulans terdekat <span>Simulasi</span>
+            </button>
+            <small>Untuk kondisi gawat darurat, segera hubungi 119 atau 112.</small>
+          </section>
+        </div>
+      )}
+
+      {/* Chatbot modal */}
+      {showChatbot && <ChatbotSheet onClose={() => setShowChatbot(false)} />}
+
+      {/* Map modal overlay */}
+      {showMap && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column' }}>
+          <header style={{ padding: '16px', backgroundColor: '#0d9488', color: 'white', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+            <button 
+              onClick={() => setShowMap(false)} 
+              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', fontWeight: 'bold', padding: 0 }}
+            >
+              <span style={{ transform: 'rotate(180deg)', display: 'inline-block', marginRight: '8px' }}>
+                <Icon name="arrow" size={20} />
+              </span> 
+              Kembali
+            </button>
+            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>Fasilitas Kesehatan Terdekat</h2>
+          </header>
+          <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+            <NearbyHospitalsMap />
+          </div>
+        </div>
+      )}
+
+      {/* Accessibility guide modal */}
+      {showAccessModal && (
+        <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setShowAccessModal(false)}>
+          <section className="sos-modal" role="dialog" aria-modal="true" aria-labelledby="access-title" style={{ maxWidth: "540px", textAlign: "left" }}>
+            <button className="modal-close" onClick={() => setShowAccessModal(false)} aria-label="Tutup"><Icon name="close" /></button>
+            <div className="sos-modal-icon" style={{ background: "#e0f2fe", color: "#0284c7", margin: "0 0 12px 0" }}>
+              <Icon name="settings" size={28} />
+            </div>
+            <p className="modal-kicker">PANDUAN AKSESIBILITAS</p>
+            <h2 id="access-title" style={{ fontSize: "20px", marginBottom: "8px" }}>Fitur Aksesibilitas Aku Care</h2>
+            <p style={{ color: "#64748b", marginBottom: "16px", fontSize: "14px" }}>
+              Platform Aku Care dirancang untuk memenuhi standar WCAG 2.1 AA agar dapat diakses mandiri oleh semua kalangan:
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "14px", color: "#334155" }}>
+              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <strong style={{ minWidth: "130px", color: "#0f172a" }}>🔊 Mode Suara:</strong>
+                <span>Membacakan teks dan panduan navigasi secara otomatis menggunakan Web Speech API Bahasa Indonesia.</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <strong style={{ minWidth: "130px", color: "#0f172a" }}>📖 Font Disleksia:</strong>
+                <span>Mengaktifkan jenis huruf khusus (OpenDyslexic) dengan ketebalan bawah untuk meningkatkan keterbacaan.</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <strong style={{ minWidth: "130px", color: "#0f172a" }}>🔤 Ukuran Teks A+:</strong>
+                <span>Memperbesar ukuran font seluruh elemen untuk membantu pengguna dengan presbiopia atau rabun dekat.</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <strong style={{ minWidth: "130px", color: "#0f172a" }}>📳 Shake-to-SOS:</strong>
+                <span>Deteksi guncangan perangkat darurat melalui DeviceMotion API dengan hitung mundur dan konfirmasi audio-getar.</span>
+              </div>
+              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <strong style={{ minWidth: "130px", color: "#0f172a" }}>⌨ Navigasi Keyboard:</strong>
+                <span>Dukungan penuh navigasi Tab dengan fokus indikator visual berkontras tinggi dan skip-to-content links.</span>
+              </div>
+            </div>
+            <button 
+              type="button" 
+              className="simulation-button" 
+              onClick={() => setShowAccessModal(false)} 
+              style={{ marginTop: "20px", width: "100%", justifyContent: "center" }}
+            >
+              Tutup Panduan
+            </button>
+          </section>
+        </div>
+      )}
+
       <div className={`toast ${notice ? "show" : ""}`} role="status">{notice}</div>
+    </div>
+  );
+}
+
+/* ============================================================
+   INFORMASI DETAIL
+   ============================================================ */
+function InformasiDetail({ go }: { go: (view: View) => void }) {
+  return (
+    <div className="public-page">
+      <header className="public-header" style={{ borderBottom: "1px solid #dce6f0", position: "sticky", top: 0, background: "rgba(255, 255, 255, 0.95)", zIndex: 10 }}>
+        <div className="public-header-inner" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Brand />
+          <button 
+            className="login-link" 
+            onClick={() => go("landing")}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}
+          >
+            <span style={{ transform: "rotate(180deg)", display: "inline-block" }}>
+              <Icon name="arrow" size={16} />
+            </span>
+            Kembali ke Beranda
+          </button>
+        </div>
+      </header>
+
+      <main id="main-public" style={{ maxWidth: "840px", margin: "40px auto", padding: "0 24px", minHeight: "70vh" }}>
+        <button
+          onClick={() => go("landing")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#0066cc",
+            cursor: "pointer",
+            fontWeight: "600",
+            marginBottom: "24px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: 0
+          }}
+        >
+          <span style={{ transform: "rotate(180deg)", display: "inline-block" }}>
+            <Icon name="arrow" size={16} />
+          </span>
+          Kembali ke Beranda
+        </button>
+
+        <article style={{ lineHeight: "1.75", color: "#334155" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "12px" }}>
+            <span className="doc-type" style={{ margin: 0 }}>EDUKASI KESEHATAN</span>
+            <span style={{ color: "#94a3b8" }}>•</span>
+            <span style={{ fontSize: "14px", color: "#64748b" }}>8 November 2026</span>
+          </div>
+
+          <h1 style={{ fontSize: "28px", color: "#0f172a", marginBottom: "16px", lineHeight: "1.3", fontWeight: "700" }}>
+            Akses Kesehatan yang Inklusif Dimulai dari Informasi yang Mudah Dipahami
+          </h1>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "28px" }}>
+            <Icon name="shield" size={20} />
+            <span style={{ fontSize: "14px", color: "#475569" }}>
+              <strong>Sumber Resmi:</strong> Kementerian Kesehatan Republik Indonesia & Pusdatin Kemenkes
+            </span>
+          </div>
+
+          <p style={{ fontSize: "16px", marginBottom: "18px" }}>
+            Kesehatan adalah hak fundamental bagi setiap warga negara tanpa terkecuali. Namun dalam praktiknya, kesenjangan akses informasi kesehatan sering kali menjadi kendala utama bagi kelompok masyarakat rentan, termasuk penyandang disabilitas fisik maupun sensorik, kelompok lansia, dan warga di wilayah pelosok.
+          </p>
+
+          <h2 style={{ fontSize: "20px", color: "#0f172a", margin: "28px 0 12px 0", fontWeight: "600" }}>
+            Prinsip Layanan Kesehatan yang Setara
+          </h2>
+          <p style={{ marginBottom: "16px" }}>
+            Platform Aku Care dibangun dengan komitmen pemenuhan standar aksesibilitas WCAG (Web Content Accessibility Guidelines) 2.1 level AA dan prinsip desain universal:
+          </p>
+          <ul style={{ paddingLeft: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+            <li><strong>Mode Suara & Pembaca Layar:</strong> Informasi disajikan dalam teks terstruktur semantik yang ramah pembaca layar (Talkback/Screen Reader) serta sintesis suara bahasa Indonesia.</li>
+            <li><strong>Tipografi Ramah Disleksia & Ukuran Teks Fleksibel:</strong> Tersedia opsi pembesaran teks dan font khusus (OpenDyslexic) dengan kontras terukur untuk kemudahan membaca.</li>
+            <li><strong>Antarmuka Berkontras Tinggi:</strong> Menjamin teks dan komponen interaktif memiliki rasio kontras warna minimal 4.5:1 agar terbaca jelas oleh individu dengan gangguan penglihatan atau buta warna.</li>
+            <li><strong>Aksesibilitas Multikanal & Tanggap Darurat:</strong> Peringatan darurat disalurkan melalui audio, visual (toast/modal), dan getaran haptik (DeviceMotion API).</li>
+          </ul>
+
+          <h2 style={{ fontSize: "20px", color: "#0f172a", margin: "28px 0 12px 0", fontWeight: "600" }}>
+            Langkah Cepat Tanggap Darurat Medis
+          </h2>
+          <p style={{ marginBottom: "16px" }}>
+            Apabila Anda atau orang di sekitar mengalami kondisi gawat darurat medis, segera gunakan fitur <strong>Layanan Darurat / SOS</strong> pada platform Aku Care atau hubungi nomor darurat nasional:
+          </p>
+          <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "10px", padding: "18px", marginBottom: "28px" }}>
+            <p style={{ margin: "0 0 10px 0", fontWeight: "bold", color: "#dc2626", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Icon name="phone" size={18} /> Nomor Kontak Kegawatdaruratan Nasional:
+            </p>
+            <p style={{ margin: "0 0 8px 0", fontSize: "15px" }}>🚑 <strong>119</strong> — Sistem Penanggulangan Gawat Darurat Terpadu (SPGDT) Kemenkes RI</p>
+            <p style={{ margin: "0", fontSize: "15px" }}>🚨 <strong>112</strong> — Layanan Panggilan Darurat Nasional Terpadu</p>
+          </div>
+
+          <div style={{ marginTop: "40px", paddingTop: "24px", borderTop: "1px solid #e2e8f0", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            <button
+              onClick={() => go("landing")}
+              className="login-link"
+              style={{ padding: "10px 20px" }}
+            >
+              ← Kembali ke Beranda
+            </button>
+            <button
+              onClick={() => go("tes_mental")}
+              className="register-cta"
+              style={{ padding: "10px 20px" }}
+            >
+              Coba Tes Kesehatan Mental (PHQ-9)
+            </button>
+          </div>
+        </article>
+      </main>
+
+      <footer className="public-footer">
+        <div>
+          <Brand light />
+          <p>Platform kesehatan inklusif untuk masyarakat Indonesia.</p>
+          <small>Aku Care · Informasi pada situs ini bukan pengganti diagnosis atau konsultasi tenaga medis langsung.</small>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -717,6 +1024,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                   if (index === 1) setSos(true);
                   else if (index === 2) go("tes_mental");
                   else if (index === 3) go("chat");
+                  else if (index === 4) go("informasi_detail");
                   else setNotice(`${label} dibuka`);
                 }}
               >
@@ -787,6 +1095,8 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                             go("tes_mental");
                           } else if (service.title === "Konsultasi Dokter") {
                             go("chat");
+                          } else if (service.title === "Informasi Kesehatan") {
+                            go("informasi_detail");
                           } else {
                             setNotice(`${service.title} dibuka`);
                           }
@@ -802,13 +1112,13 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                 <section className="dash-articles">
                   <div className="dash-section-title">
                     <div><h2>Informasi pilihan</h2><p>Ringkasan terbaru dari sumber kesehatan kredibel</p></div>
-                    <button onClick={() => setNotice("Semua informasi dibuka")}>Lihat semua <Icon name="arrow" size={15} /></button>
+                    <button onClick={() => go("informasi_detail")}>Lihat semua <Icon name="arrow" size={15} /></button>
                   </div>
                   <div className="dash-article-grid">
                     {publicArticles.map((article) => (
                       <article key={article.title}>
                         <span>{article.type}</span><h3>{article.title}</h3><p>{article.source}</p>
-                        <button onClick={() => setNotice("Artikel dibuka")}>Baca artikel <Icon name="arrow" size={14} /></button>
+                        <button onClick={() => go("informasi_detail")}>Baca artikel <Icon name="arrow" size={14} /></button>
                       </article>
                     ))}
                   </div>
@@ -1028,6 +1338,10 @@ export default function App() {
 
   if (view === "chat") {
     return <Konsultasi go={setView} />;
+  }
+
+  if (view === "informasi_detail") {
+    return <InformasiDetail go={setView} />;
   }
 
   return <Landing go={setView} />;
