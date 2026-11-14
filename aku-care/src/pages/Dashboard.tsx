@@ -545,7 +545,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
               <div className="flex-1 relative overflow-hidden">
                 <NearbyHospitalsMap 
                   user={user} 
-                  onNotify={(msg) => setNotice(msg)} 
+                  onNotify={(msg: string) => setNotice(msg)} 
                   onBack={() => setShowNearbyHospitals(false)} 
                 />
               </div>
