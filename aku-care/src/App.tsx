@@ -8,10 +8,12 @@ import { ChatbotSheet } from "./Chatbot";
 import NearbyHospitalsMap from "./RumahSakit";
 import { TesMental } from "./TesMental";
 import { Konsultasi } from "./Konsultasi";
+import { Profil } from "./Profil";
+import { Pengaturan } from "./Pengaturan";
 import { useShakeDetection } from "./hooks/useShakeDetection";
 
-// 1. Tipe View diperbarui untuk form lupa sandi, tes mental, konsultasi chat, dan detail informasi
-export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat" | "informasi_detail";
+// 1. Tipe View diperbarui untuk form lupa sandi, tes mental, konsultasi chat, detail informasi, profil, dan pengaturan
+export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat" | "informasi_detail" | "profil" | "pengaturan";
 type IconName =
   | "home" | "heart" | "calendar" | "message" | "book" | "settings"
   | "bell" | "search" | "hospital" | "brain" | "doctor" | "ambulance"
@@ -1032,8 +1034,8 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
               </button>
             ))}
             <span>PENGELOLAAN</span>
-            <button onClick={() => setNotice("Profil medis dibuka")}><Icon name="user" /> Profil & Info Medis</button>
-            <button onClick={() => setNotice("Pengaturan aksesibilitas dibuka")}><Icon name="settings" /> Pengaturan</button>
+            <button onClick={() => go("profil")}><Icon name="user" /> Profil & Info Medis</button>
+            <button onClick={() => go("pengaturan")}><Icon name="settings" /> Pengaturan</button>
           </nav>
           <div className="dash-profile">
             <div className="dash-avatar">{initials}</div>
@@ -1062,7 +1064,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                 <h1>Selamat pagi, {firstName}.</h1>
                 <p>Akses layanan dan informasi kesehatan Anda dari satu tempat.</p>
               </div>
-              <button onClick={() => setNotice("Pengaturan cepat dibuka")}><Icon name="settings" /> Pengaturan aksesibilitas</button>
+              <button onClick={() => go("pengaturan")}><Icon name="settings" /> Pengaturan aksesibilitas</button>
             </section>
             <section className="dash-banner">
               <div>
@@ -1167,7 +1169,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                     <span><Icon name="settings" size={17} /> Mode buta warna</span>
                     <button className="access-select" onClick={() => setNotice("Pilihan mode warna dibuka")}>Normal</button>
                   </label>
-                  <button className="access-more" onClick={() => setNotice("Semua pengaturan dibuka")}>Lihat semua pengaturan</button>
+                  <button className="access-more" onClick={() => go("pengaturan")}>Lihat semua pengaturan</button>
                 </section>
               </aside>
             </div>
@@ -1342,6 +1344,14 @@ export default function App() {
 
   if (view === "informasi_detail") {
     return <InformasiDetail go={setView} />;
+  }
+
+  if (view === "profil") {
+    return <Profil go={setView} />;
+  }
+
+  if (view === "pengaturan") {
+    return <Pengaturan go={setView} />;
   }
 
   return <Landing go={setView} />;
