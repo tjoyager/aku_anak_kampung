@@ -507,22 +507,28 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setSessionLoading(false);
-      if (session?.user) setView("dashboard");
+      // Hanya arahkan ke dashboard jika pengguna sedang berada di halaman luar
+      setView((prevView) => {
+        if (session?.user && (prevView === "landing" || prevView === "login" || prevView === "register")) {
+          return "dashboard";
+        }
+        return prevView; // Biarkan view lain (seperti "lokasi" atau "chatbot") tetap jalan
+      });
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (event === "PASSWORD_RECOVERY") {
         setView("update_password");
-      } else if (session?.user && view !== "update_password") {
-        setView("dashboard");
+      } else if (session?.user) {
+        setView((prevView) => (prevView === "landing" || prevView === "login" || prevView === "register" ? "dashboard" : prevView));
       } else if (!session?.user) {
-        setView((v) => (v === "dashboard" ? "landing" : v));
+        setView("landing");
       }
     });
 
     return () => sub.subscription.unsubscribe();
-  }, [view]);
+  }, []); // <-- KUNCI PERBAIKAN: Array dependensi harus KOSONG agar tidak looping!
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
