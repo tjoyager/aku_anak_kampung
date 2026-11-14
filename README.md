@@ -3,22 +3,37 @@
 > **Logicodix Hackathon 2026 Submission**  
 > **Kategori:** Web Application  
 > **Tema:** Inclusive Health & Well-being  
-> **Nama Tim:** Aku Anak Kampung Team  
+> **Nama Tim:** Aku Anak Kampung Team
+
+---
+
+## Daftar Isi
+
+1. [Tentang Produk & Latar Belakang](#1-tentang-produk--latar-belakang)
+2. [Fitur Utama](#2-fitur-utama)
+3. [Arsitektur Sistem & Tech Stack](#3-arsitektur-sistem--tech-stack)
+4. [Panduan Instalasi & Menjalankan Proyek](#4-panduan-instalasi--menjalankan-proyek)
+5. [Akun & Kredensial Demo](#5-akun--kredensial-demo)
+6. [Atribusi AI & Pihak Ketiga](#6-atribusi-ai--pihak-ketiga)
 
 ---
 
 ## 1. Tentang Produk & Latar Belakang
 
 ### Masalah
+
 Penyandang disabilitas (tunanetra, tunarungu, dan buta warna) seringkali menghadapi hambatan besar saat mengakses layanan kesehatan digital:
+
 - **Aksesibilitas Terabaikan:** Sebagian besar aplikasi kesehatan tidak memiliki label ARIA, navigasi sulit dibaca oleh screen reader, dan informasi penting hanya disampaikan melalui satu modalitas (misalnya visual saja atau suara saja).
 - **Hambatan pada Situasi Darurat:** Pada kondisi gawat darurat, pengguna tunanetra kesulitan menavigasi peta atau membaca tombol, sementara pengguna tunarungu terhambat jika panggilan telepon adalah satu-satunya kanal bantuan.
 - **Keterbatasan Skrining & Konsultasi:** Akses terhadap edukasi dan konsultasi kesehatan mental masih terbatas karena stigma sosial dan jarak fisik ke fasilitas medis terdekat.
 
 ### Solusi: AkuCare
-**AkuCare** hadir sebagai solusi platform kesehatan inklusif yang dirancang sejak awal (*accessibility-by-design*) agar dapat digunakan secara mandiri oleh semua kalangan masyarakat:
+
+**AkuCare** hadir sebagai solusi platform kesehatan inklusif yang dirancang sejak awal (_accessibility-by-design_) agar dapat digunakan secara mandiri oleh semua kalangan masyarakat:
+
 - **Talkback & Voice Guidance:** Fitur pembaca layar bawaan berbasis Web Speech API yang membacakan navigasi, teks, dan status antarmuka secara otomatis dengan double-tap confirmation dan highlight visual berfokus tinggi.
-- **Multimodal Feedback (Teks, Suara & Getaran):** Dukungan umpan balik getaran (*vibration*) dan notifikasi visual kontras tinggi untuk kenyamanan tunarungu dan tunanetra.
+- **Multimodal Feedback (Teks, Suara & Getaran):** Dukungan umpan balik getaran (_vibration_) dan notifikasi visual kontras tinggi untuk kenyamanan tunarungu dan tunanetra.
 - **Layanan Terintegrasi:** Menghubungkan informasi kesehatan terkurasi, konsultasi dokter daring, skrining kesehatan mental, dan tombol darurat cepat (SOS) dalam satu aplikasi web adaptif.
 
 ---
@@ -26,7 +41,7 @@ Penyandang disabilitas (tunanetra, tunarungu, dan buta warna) seringkali menghad
 ## 2. Fitur Utama
 
 1. **Aksesibilitas Bawaan (Talkback & Focus Mode):**
-   - Mode suara pintar (*Text-to-Speech*) berbahasa Indonesia menggunakan Web Speech API.
+   - Mode suara pintar (_Text-to-Speech_) berbahasa Indonesia menggunakan Web Speech API.
    - Pemandu sentuhan interaktif: sentuhan pertama menyorot elemen dengan outline kontras kuning (`#facc15`), sentuhan kedua mengeksekusi aksi.
    - Pilihan preferensi tampilan adaptif (ukuran teks, kontras, mode buta warna).
 
@@ -36,11 +51,11 @@ Penyandang disabilitas (tunanetra, tunarungu, dan buta warna) seringkali menghad
 
 3. **Autentikasi & Manajemen Pengguna (Supabase Auth):**
    - Pendaftaran dan masuk akun aman dengan Email & Password, Username (via RPC `get_email_by_username`), serta Google OAuth.
-   - Fitur pemulihan kata sandi (*Forgot / Reset Password*) otomatis terintegrasi dengan session listener.
+   - Fitur pemulihan kata sandi (_Forgot / Reset Password_) otomatis terintegrasi dengan session listener.
    - Penyimpanan data profil dan persetujuan pemrosesan data pribadi secara aman.
 
 4. **Bantuan & Simulasi Darurat (SOS Emergency):**
-   - Tombol darurat cepat melayang (*floating SOS button*).
+   - Tombol darurat cepat melayang (_floating SOS button_).
    - Akses panggilan cepat ke nomor darurat nasional (119 dan 112).
    - Fitur simulasi penjemputan ambulans terdekat.
 
@@ -91,21 +106,24 @@ aku_anak_kampung/
 ## 4. Panduan Instalasi & Menjalankan Proyek
 
 ### Prasyarat
+
 - [Node.js](https://nodejs.org/) versi 18.0+ atau 20.0+ (disarankan Node.js LTS)
 - Manajer paket `npm` atau `pnpm`
 - Akun proyek [Supabase](https://supabase.com/)
 
 ### Langkah 1: Kloning Repositori
+
 ```bash
 git clone https://github.com/hadryan/aku_anak_kampung.git
 cd aku_anak_kampung
 ```
 
 ### Langkah 2: Setup Database Supabase
+
 1. Masuk ke dashboard proyek Supabase Anda.
 2. Buka menu **SQL Editor**.
 3. Buka file [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql), lalu salin dan jalankan seluruh isi kueri SQL tersebut untuk membuat tabel `doctors` dan fungsi RPC `get_email_by_username`.
-4. *(Opsional - Seeding Dokter)* Tambahkan beberapa baris data dokter contoh:
+4. _(Opsional - Seeding Dokter)_ Tambahkan beberapa baris data dokter contoh:
    ```sql
    INSERT INTO public.doctors (name, specialty, initial) VALUES
    ('dr. Ratna Wijaya, Sp.KJ', 'Spesialis Kesehatan Jiwa', 'RW'),
@@ -114,6 +132,7 @@ cd aku_anak_kampung
    ```
 
 ### Langkah 3: Konfigurasi Environment Variable
+
 1. Masuk ke direktori `aku-care`:
    ```bash
    cd aku-care
@@ -129,6 +148,7 @@ cd aku_anak_kampung
    ```
 
 ### Langkah 4: Instalasi Dependensi & Menjalankan Server Lokal
+
 ```bash
 # Instalasi dependensi
 npm install
@@ -136,6 +156,7 @@ npm install
 # Menjalankan development server
 npm run dev
 ```
+
 Buka browser dan akses aplikasi melalui tautan yang muncul di terminal (biasanya `http://localhost:5173` atau `http://localhost:8443`).
 
 ---
@@ -143,6 +164,7 @@ Buka browser dan akses aplikasi melalui tautan yang muncul di terminal (biasanya
 ## 5. Akun & Kredensial Demo
 
 Untuk pengujian cepat saat evaluasi hackathon:
+
 - **Mode Tamu / Eksplorasi Langsung:** Pengguna dapat langsung menekan tombol **"Coba Layanan Sekarang"** di Landing Page untuk masuk ke antarmuka utama.
 - **Akun Uji Coba:**
   - **Email:** `demo@akucare.id`
@@ -155,10 +177,12 @@ Untuk pengujian cepat saat evaluasi hackathon:
 ## 6. Atribusi AI & Pihak Ketiga
 
 Proyek ini dibangun dan disempurnakan dengan dukungan alat-alat berikut:
+
 - **Figma & Figma Make:** Ekspor fondasi desain visual dan layout antarmuka inklusif.
 - **Google Antigravity AI Assistant:** Digunakan untuk analisis arsitektur, refactor audit aksesibilitas, otomasi migrasi Supabase, standardisasi struktur file, dan dokumentasi repositori.
 - **Web Speech API & Web Vibration API:** API standar peramban untuk fungsionalitas bantuan suara dan getaran tanpa dependensi berbayar.
 - **Supabase Cloud Platform:** Penyedia layanan Backend-as-a-Service, Autentikasi, dan PostgreSQL database.
 
 ---
-*Dibuat dengan dedikasi untuk kesetaraan akses layanan kesehatan bagi seluruh masyarakat Indonesia.*
+
+_Dibuat dengan dedikasi untuk kesetaraan akses layanan kesehatan bagi seluruh masyarakat Indonesia._
