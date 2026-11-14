@@ -118,9 +118,12 @@ export default function Auth() {
 
       {pesan && <p style={{ color: '#2563eb', marginTop: '15px' }}>{pesan}</p>}
 
-      <p style={{ marginTop: '20px', cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => { setIsLogin(!isLogin); setPesan(''); }}>
+      <button
+        style={{ marginTop: '20px', cursor: 'pointer', color: 'blue', textDecoration: 'underline', background: 'none', border: 'none', font: 'inherit', padding: 0 }}
+        onClick={() => { setIsLogin(!isLogin); setPesan(''); }}
+      >
         {isLogin ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login di sini'}
-      </p>
+      </button>
     </div>
   );
 }
