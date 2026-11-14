@@ -670,7 +670,17 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
           <header className="dash-topbar">
             <div className="dash-mobile-brand"><Brand /></div>
             <label className="dash-search">
-              <Icon name="search" size={18} /><input placeholder="Cari layanan atau informasi" aria-label="Cari layanan atau informasi" />
+              <Icon name="search" size={18} />
+              <input
+                placeholder="Cari layanan atau informasi"
+                aria-label="Cari layanan atau informasi"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    go("informasi_detail");
+                  }
+                }}
+              />
             </label>
             <div>
               <button className={`voice-toggle ${voice ? "active" : ""}`} onClick={toggleVoice}>
@@ -710,20 +720,20 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                       <button 
                         key={service.title} 
                         onClick={() => {
-                          if (service.title === "Rumah Sakit Terdekat") {
-                            setShowMap(true);
-                          } else if (service.title === "Panggil Ambulans") {
+                          if (service.icon === "hospital") {
+                            go("lokasi");
+                          } else if (service.icon === "ambulance") {
                             setSos(true);
-                          } else if (service.title === "Chatbot Pendamping") {
-                            setShowChatbot(true);
-                          } else if (service.title === "Tes Kesehatan Mental") {
+                          } else if (service.icon === "brain") {
                             go("tes_mental");
-                          } else if (service.title === "Konsultasi Dokter") {
+                          } else if (service.icon === "doctor") {
                             go("chat");
-                          } else if (service.title === "Informasi Kesehatan") {
+                          } else if (service.icon === "bot") {
+                            go("chatbot");
+                          } else if (service.icon === "book") {
                             go("informasi_detail");
                           } else {
-                            setNotice(`${service.title} dibuka`);
+                            go("informasi_detail");
                           }
                         }}
                       >
