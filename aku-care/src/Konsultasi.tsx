@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { View } from "./App";
+import { supabase } from "./lib/supabase";
 
 interface KonsultasiProps {
   go: (view: View) => void;
@@ -8,10 +9,15 @@ interface KonsultasiProps {
 }
 
 interface Message {
-  id: string;
-  sender: "user" | "doctor" | "system";
-  text: string;
-  time: string;
+  id?: string | number;
+  sender?: "user" | "doctor" | "system" | string;
+  sender_id?: string;
+  text?: string;
+  message?: string;
+  content?: string;
+  time?: string;
+  created_at?: string;
+  [key: string]: any;
 }
 
 export function Konsultasi({
@@ -49,30 +55,54 @@ export function Konsultasi({
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
-  // TODO (Aga): Hubungkan dengan supabase.channel('realtime_chat') untuk sinkronisasi pesan realtime:
-  // useEffect(() => {
-  //   const channel = supabase.channel(`consultation_${chatId}`)
-  //     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-  //       setMessages((prev) => [...prev, payload.new as Message]);
-  //     })
-  //     .subscribe();
-  //   return () => { supabase.removeChannel(channel); };
-  // }, []);
+  useEffect(() => {
+    // Load pesan awal dari tabel messages menggunakan supabase.from('messages').select('*')
+    const loadMessages = async () => {
+      const { data, error } = await supabase.from('messages').select('*');
+      if (data && data.length > 0) {
+        setMessages(data as Message[]);
+      }
+    };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+    loadMessages();
+
+    // Subscription ke WebSockets Supabase
+    const channel = supabase.channel('realtime_chat').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => { setMessages((prev) => [...prev, payload.new as Message]) }).subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
+
+    const messageText = inputText.trim();
+    const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     const newMsg: Message = {
       id: Date.now().toString(),
       sender: "user",
-      text: inputText.trim(),
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      text: messageText,
+      time: timeStr,
     };
 
     setMessages((prev) => [...prev, newMsg]);
     setInputText("");
     setIsTyping(true);
+
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      await supabase.from('messages').insert({
+        text: messageText,
+        sender: "user",
+        time: timeStr,
+        ...(authData?.user?.id ? { sender_id: authData.user.id } : {}),
+      });
+    } catch (err) {
+      console.error("Gagal mengirim pesan ke Supabase:", err);
+    }
 
     // Simulasi respons dokter setelah 1.5 detik
     setTimeout(() => {
@@ -115,19 +145,23 @@ export function Konsultasi({
 
       {/* Area Chat Messages */}
       <div style={{ flex: 1, padding: "20px", overflowY: "auto", background: "#f8fafc", display: "flex", flexDirection: "column", gap: "12px" }}>
-        {messages.map((msg) => {
+        {messages.map((msg, index) => {
+          const key = msg.id ?? index;
           if (msg.sender === "system") {
             return (
-              <div key={msg.id} style={{ alignSelf: "center", background: "#e2e8f0", color: "#475569", padding: "6px 14px", borderRadius: "999px", fontSize: "11px", maxWidth: "80%", textAlign: "center" }}>
-                {msg.text}
+              <div key={key} style={{ alignSelf: "center", background: "#e2e8f0", color: "#475569", padding: "6px 14px", borderRadius: "999px", fontSize: "11px", maxWidth: "80%", textAlign: "center" }}>
+                {msg.text || msg.message || msg.content}
               </div>
             );
           }
 
-          const isUser = msg.sender === "user";
+          const isUser = msg.sender === "user" || (!msg.sender && msg.sender_id != null) || (msg.sender !== "doctor" && msg.sender !== "system");
+          const displayText = msg.text || msg.message || msg.content || "";
+          const displayTime = msg.time || (msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "");
+
           return (
             <div
-              key={msg.id}
+              key={key}
               style={{
                 alignSelf: isUser ? "flex-end" : "flex-start",
                 maxWidth: "75%",
@@ -149,10 +183,10 @@ export function Konsultasi({
                   wordBreak: "break-word",
                 }}
               >
-                {msg.text}
+                {displayText}
               </div>
               <span style={{ fontSize: "10px", color: "#94a3b8", marginTop: "4px", padding: "0 4px" }}>
-                {msg.time}
+                {displayTime}
               </span>
             </div>
           );
