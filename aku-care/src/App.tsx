@@ -92,6 +92,10 @@ export default function App() {
     content = <TesMental go={setView} />;
   } else if (view === "chat") {
     content = <Konsultasi go={setView} />;
+  } else if (view === "lokasi") {
+    content = <RumahSakit go={setView} />;
+  } else if (view === "chatbot") {
+    content = <Chatbot go={setView} />;
   } else if (view === "informasi_detail") {
     content = <InformasiDetail go={setView} />;
   } else if (view === "profil") {

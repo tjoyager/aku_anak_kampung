@@ -179,3 +179,23 @@ export function ChatbotSheet({ onClose }: { onClose: () => void }) {
     </>
   );
 }
+
+export function Chatbot({ go }: { go?: (view: any) => void }) {
+  return (
+    <div style={{ minHeight: "100vh", background: "#f8fafc", display: "flex", flexDirection: "column" }}>
+      <header style={{ padding: "16px 20px", background: "#0066cc", color: "#ffffff", display: "flex", alignItems: "center", gap: "16px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
+        <button
+          onClick={() => (go ? go("landing") : window.history.back())}
+          style={{ background: "none", border: "none", color: "#ffffff", cursor: "pointer", display: "flex", alignItems: "center", fontWeight: "bold", fontSize: "14px", padding: 0 }}
+        >
+          <span style={{ transform: "rotate(180deg)", display: "inline-block", marginRight: "8px" }}>→</span>
+          Kembali ke Beranda
+        </button>
+        <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>Chatbot Pendamping Aku Care</h2>
+      </header>
+      <div style={{ flex: 1, position: "relative" }}>
+        <ChatbotSheet onClose={() => (go ? go("landing") : window.history.back())} />
+      </div>
+    </div>
+  );
+}
