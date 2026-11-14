@@ -19,7 +19,6 @@ const fadeUp: Variants = {
 };
 
 
-/* -------------------------------------------------------------------------- */
 type HeroSlide = { src: string; alt: string };
 
 const HERO_SLIDES: HeroSlide[] = [
