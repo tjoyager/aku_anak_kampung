@@ -307,34 +307,39 @@ export default function Landing({ go }: { go: (view: View) => void }) {
           className="bg-[#0a4783] text-white"
           aria-label="Akses cepat darurat"
         >
-          <div className="w-full min-h-[76px] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mx-auto px-3.5 sm:px-5 md:px-12 py-[13px] sm:py-0">
-            <div className="flex items-center gap-[11px]">
-              <span className="w-[38px] h-[38px] grid place-items-center rounded-full bg-white/10 flex-none">
-                <Icon name="phone" />
+          <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 mx-auto px-4 sm:px-6 md:px-10 lg:px-14 py-4 sm:py-5">
+            
+            {/* Bagian Kiri: Ikon & Teks */}
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 sm:w-11 sm:h-11 grid place-items-center rounded-full bg-white/15 flex-none">
+                <Icon name="phone" size={20} />
               </span>
-              <p>
-                <strong className="block font-manrope font-bold text-[12px]">
+              <div>
+                <strong className="block font-manrope font-bold text-[14px] sm:text-[15px]">
                   Butuh bantuan darurat?
                 </strong>
-                <small className="hidden sm:block mt-[3px] text-[#bcd4ec] text-[8.5px]">
+                <small className="block mt-0.5 text-[#bcd4ec] text-[11px] sm:text-[12px]">
                   Hubungi layanan kegawatdaruratan nasional
                 </small>
-              </p>
+              </div>
             </div>
-            <div className="flex gap-2">
+
+            {/* Bagian Kanan: Tombol Aksi */}
+            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full sm:w-auto">
               <a
                 href="tel:119"
-                className="px-[18px] py-[9px] border border-white rounded-[7px] font-bold text-[10px] bg-white text-[#a9202d] hover:bg-slate-100 transition-colors"
+                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg font-bold text-[13px] bg-white text-[#a9202d] hover:bg-slate-100 active:scale-95 transition-all shadow-sm"
               >
                 Telepon 119
               </a>
               <a
                 href="tel:112"
-                className="px-[18px] py-[9px] border border-white/35 rounded-[7px] font-bold text-[10px] text-white hover:bg-white/10 transition-colors"
+                className="w-full sm:w-auto text-center px-5 py-2.5 mr-6 rounded-lg font-bold text-[13px] border border-white/40 text-white hover:bg-white/10 active:scale-95 transition-all"
               >
                 Telepon 112
               </a>
             </div>
+
           </div>
         </section>
 

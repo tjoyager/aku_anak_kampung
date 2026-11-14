@@ -11,7 +11,7 @@ import { Profil } from "./Profil";
 import { Pengaturan } from "./Pengaturan";
 import { useShakeDetection } from "./hooks/useShakeDetection";
 import Landing from "./pages/Landing";
-import doctorPhoto from "./assets/akk-doctor.jpg";
+import { A11yWidget } from "./components/A11yWidget"; // <-- Import yang hilang
 
 export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat" | "informasi_detail" | "profil" | "pengaturan";
 
@@ -193,7 +193,7 @@ function InformasiDetail({ go }: { go: (view: View) => void }) {
 }
 
 /* ============================================================
-   AUTH SCREEN — Dengan Logika Lengkap (Login, Register, Lupa Password)
+   AUTH SCREEN — Ditambahkan kembali karena hilang saat merge
    ============================================================ */
 function AuthScreen({
   mode,
@@ -213,7 +213,7 @@ function AuthScreen({
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const [identifier, setIdentifier] = useState(""); // Digunakan saat Login
+  const [identifier, setIdentifier] = useState(""); 
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -262,9 +262,8 @@ function AuthScreen({
       return;
     }
     
-    // Fitur menyimpan Username tapi mengosongkan Password:
     setPassword("");
-    setIdentifier(username.trim()); // Memasukkan username ke input form login
+    setIdentifier(username.trim());
     setSuccessMsg("Pendaftaran berhasil! Silakan masuk dengan kata sandi Anda.");
     go("login");
   };
@@ -297,14 +296,10 @@ function AuthScreen({
 
       onAuthSuccess();
     } catch (err) {
-      // BAGIAN INI YANG DIUBAH
       let message = err instanceof Error ? err.message : "Terjadi kesalahan saat login.";
-      
-      // Menerjemahkan pesan error spesifik dari Supabase
       if (message.includes("Invalid login credentials")) {
         message = "Email/Username atau kata sandi yang Anda masukkan salah.";
       }
-      
       setErrorMsg(message);
     } finally {
       setLoading(false);
@@ -532,7 +527,6 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
     setDyslexic((prev) => !prev);
   };
 
-  // Shake-to-SOS (DeviceMotion API)
   useShakeDetection(() => {
     if (!shakeModalOpen && !sos) {
       setCountdown(3);
@@ -543,7 +537,6 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
     }
   });
 
-  // Countdown timer untuk memanggil bantuan darurat
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (shakeModalOpen) {
@@ -647,7 +640,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                 <p>Gunakan skrining kesehatan mental, konsultasi dokter, layanan darurat, dan informasi tepercaya sesuai kebutuhan Anda.</p>
                 <button onClick={() => go("chat")}>Mulai konsultasi <Icon name="arrow" size={17} /></button>
               </div>
-              <img src={doctorPhoto} alt="Dokter profesional Aku Care" />
+              <img src="/fitur-1.jpg" alt="Dokter profesional Aku Care" />
             </section>
             <div className="dash-layout">
               <div className="dash-primary">
@@ -828,7 +821,6 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
         {showChatbot && <ChatbotSheet onClose={() => setShowChatbot(false)} />}
         {showMap && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column' }}>
-            {/* Header Overlay */}
             <header style={{ padding: '16px', backgroundColor: '#0d9488', color: 'white', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
               <button 
                 onClick={() => setShowMap(false)} 
@@ -841,8 +833,6 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
               </button>
               <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>Fasilitas Kesehatan Terdekat</h2>
             </header>
-            
-            {/* Area Peta */}
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
               <NearbyHospitalsMap />
             </div>
@@ -895,36 +885,33 @@ export default function App() {
     );
   }
 
+  let content;
   if (view === "login" || view === "register" || view === "forgot" || view === "update_password") {
-    return <AuthScreen mode={view} go={setView} onAuthSuccess={() => setView("dashboard")} />;
-  }
-
-  if (view === "dashboard") {
+    content = <AuthScreen mode={view} go={setView} onAuthSuccess={() => setView("dashboard")} />;
+  } else if (view === "dashboard") {
     if (!user) {
-      return <AuthScreen mode="login" go={setView} onAuthSuccess={() => setView("dashboard")} />;
+      content = <AuthScreen mode="login" go={setView} onAuthSuccess={() => setView("dashboard")} />;
+    } else {
+      content = <Dashboard go={setView} user={user} />;
     }
-    return <Dashboard go={setView} user={user} />;
+  } else if (view === "tes_mental") {
+    content = <TesMental go={setView} />;
+  } else if (view === "chat") {
+    content = <Konsultasi go={setView} />;
+  } else if (view === "informasi_detail") {
+    content = <InformasiDetail go={setView} />;
+  } else if (view === "profil") {
+    content = <Profil go={setView} />;
+  } else if (view === "pengaturan") {
+    content = <Pengaturan go={setView} />;
+  } else {
+    content = <Landing go={setView} />;
   }
 
-  if (view === "tes_mental") {
-    return <TesMental go={setView} />;
-  }
-
-  if (view === "chat") {
-    return <Konsultasi go={setView} />;
-  }
-
-  if (view === "informasi_detail") {
-    return <InformasiDetail go={setView} />;
-  }
-
-  if (view === "profil") {
-    return <Profil go={setView} />;
-  }
-
-  if (view === "pengaturan") {
-    return <Pengaturan go={setView} />;
-  }
-
-  return <Landing go={setView} />;
+  return (
+    <>
+      <A11yWidget />
+      {content}
+    </>
+  );
 }
