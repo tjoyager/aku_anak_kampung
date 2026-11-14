@@ -6,7 +6,8 @@
   font-family: 'OpenDyslexic', sans-serif !important;
 }
 
-.large-text {
+.large-text,
+.large-text * {
   font-size: 1.15em !important;
 }
 

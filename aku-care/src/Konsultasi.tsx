@@ -25,10 +25,12 @@ export function Konsultasi({
   doctorName = "dr. Ratna Wijaya, Sp.KJ",
   specialty = "Spesialis Kesehatan Jiwa",
 }: KonsultasiProps) {
+  const makeInitial = (n: string) => n.replace(/^dr\.\s*/i, "").split(/[\s,]+/).filter(Boolean).map(w => w[0]).join("").slice(0, 2).toUpperCase() || "??";
+
   const [selectedDoctor, setSelectedDoctor] = useState({
     name: doctorName,
     specialty: specialty,
-    initial: "RW",
+    initial: makeInitial(doctorName),
     sip: "SIP. 503/442/DS/2024",
   });
   const [messages, setMessages] = useState<Message[]>([
@@ -156,7 +158,7 @@ export function Konsultasi({
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ fontSize: "18px" }}>🩺</span>
           <span>
-            Pasien sedang berkonsultasi langsung dengan <strong>dr. Ratna Wijaya, Sp.KJ (Spesialis Kesehatan Jiwa)</strong>. Sesi konsultasi aktif &amp; terenkripsi.
+            Pasien sedang berkonsultasi langsung dengan <strong>{selectedDoctor.name} ({selectedDoctor.specialty})</strong>. Sesi konsultasi aktif &amp; terenkripsi.
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -247,7 +249,7 @@ export function Konsultasi({
 
         {isTyping && (
           <div style={{ alignSelf: "flex-start", background: "#ffffff", padding: "8px 14px", borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "12px", color: "#64748b" }}>
-            <em>dr. Ratna sedang mengetik...</em>
+            <em>{selectedDoctor.name} sedang mengetik...</em>
           </div>
         )}
       </div>

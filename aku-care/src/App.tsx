@@ -9,16 +9,11 @@ import { TesMental } from "./TesMental";
 import { Konsultasi } from "./Konsultasi";
 import { Profil } from "./Profil";
 import { Pengaturan } from "./Pengaturan";
-<<<<<<< HEAD
 import { useShakeDetection } from "./hooks/useShakeDetection";
-import Landing from "./pages/Landing";
-import AuthScreen from "./pages/AuthScreen";
-import InformasiDetail from "./pages/InformasiDetail";
 import { A11yWidget } from "./components/A11yWidget";
-=======
-import { Chatbot } from "./Chatbot";
-import { RumahSakit } from "./RumahSakit";
->>>>>>> a619fda1d6ce49896787bd27eaefab4aa75f0bb0
+import AuthScreen from "./pages/AuthScreen";
+import Landing from "./pages/Landing";
+import InformasiDetail from "./pages/InformasiDetail";
 
 export type View =
   | "landing"
@@ -29,16 +24,12 @@ export type View =
   | "dashboard"
   | "tes_mental"
   | "chat"
+  | "dokter"
   | "informasi_detail"
   | "profil"
   | "pengaturan"
-<<<<<<< HEAD
-  | "lokasi"
-  | "chatbot";
-=======
   | "chatbot"
   | "lokasi";
->>>>>>> a619fda1d6ce49896787bd27eaefab4aa75f0bb0
 
 type IconName =
   | "home" | "heart" | "calendar" | "message" | "book" | "settings"
@@ -96,7 +87,7 @@ const publicArticles = [
 
 const dashboardServices: { icon: IconName; title: string; text: string; tag?: string }[] = [
   { icon: "hospital", title: "Rumah Sakit Terdekat", text: "Peta dan daftar layanan di sekitar Anda" },
-  { icon: "ambulance", title: "Panggil Ambulans", text: "Permintaan penjemputan terdekat", tag: "Simulasi" },
+  { icon: "ambulance", title: "Panggil Ambulans", text: "Permintaan penjemputan terdekat" },
   { icon: "brain", title: "Tes Kesehatan Mental", text: "PHQ-9, GAD-7, DASS-21, dan Big Five" },
   { icon: "doctor", title: "Konsultasi Dokter", text: "Pesan langsung dengan dokter terverifikasi" },
   { icon: "bot", title: "Chatbot Pendamping", text: "Informasi umum dan panduan aplikasi" },
@@ -106,7 +97,7 @@ const dashboardServices: { icon: IconName; title: string; text: string; tag?: st
 /* ============================================================
    DASHBOARD
    ============================================================ */
-function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
+function Dashboard({ go, user, onSelectDoctor }: { go: (view: View) => void; user: User; onSelectDoctor: (name: string) => void }) {
   const [voice, setVoice] = useState(false);
   const [sos, setSos] = useState(false);
   const [notice, setNotice] = useState("");
@@ -226,7 +217,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                   if (index === 0) window.scrollTo({ top: 0, behavior: "smooth" });
                   else if (index === 1) setSos(true);
                   else if (index === 2) go("tes_mental");
-                  else if (index === 3) go("chat");
+                  else if (index === 3) go("dokter");
                   else if (index === 4) go("informasi_detail");
                   else setNotice(`${label} dibuka`);
                 }}
@@ -284,7 +275,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                 <span className="banner-label"><Icon name="shield" size={15} /> PENDAMPING KESEHATAN ANDA</span>
                 <h2>Layanan kesehatan yang dapat<br />Anda akses secara mandiri.</h2>
                 <p>Gunakan skrining kesehatan mental, konsultasi dokter, layanan darurat, dan informasi tepercaya sesuai kebutuhan Anda.</p>
-                <button onClick={() => go("chat")}>Mulai konsultasi <Icon name="arrow" size={17} /></button>
+                <button onClick={() => go("dokter")}>Mulai konsultasi <Icon name="arrow" size={17} /></button>
               </div>
               <img src="/fitur-1.jpg" alt="Dokter profesional Aku Care" />
             </section>
@@ -307,7 +298,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                           } else if (service.icon === "brain") {
                             go("tes_mental");
                           } else if (service.icon === "doctor") {
-                            go("chat");
+                            go("dokter");
                           } else if (service.icon === "bot") {
                             go("chatbot");
                           } else if (service.icon === "book") {
@@ -318,7 +309,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                         }}
                       >
                         <span className={`dash-service-icon ${service.icon}`}><Icon name={service.icon} size={23} /></span>
-                        <span><strong>{service.title} {service.tag && <em>{service.tag}</em>}</strong><small>{service.text}</small></span>
+                        <span><strong>{service.title}</strong><small>{service.text}</small></span>
                         <Icon name="arrow" size={16} />
                       </button>
                     ))}
@@ -350,7 +341,10 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                 </section>
                 <DoctorSection
                   voiceModeActive={voice} 
-                  onOpenChat={() => go("chat")} 
+                  onOpenChat={(doctorName: string) => {
+                    onSelectDoctor(doctorName);
+                    go("chat");
+                  }} 
                 />
                 <section className="access-quick">
                   <div className="aside-title"><div><h2>Aksesibilitas cepat</h2><p>Sesuaikan pengalaman Anda</p></div></div>
@@ -412,18 +406,8 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
               <div className="sos-modal-icon"><Icon name="phone" size={28} /></div>
               <p className="modal-kicker">BANTUAN DARURAT</p>
               <h2 id="sos-title">Anda membutuhkan bantuan?</h2>
-              <p>Hubungi layanan darurat nasional atau gunakan simulasi ambulans terdekat.</p>
+              <p>Hubungi layanan darurat nasional segera.</p>
               <div className="emergency-links"><a href="tel:119"><Icon name="phone" /> Telepon 119</a><a href="tel:112"><Icon name="phone" /> Telepon 112</a></div>
-              <button
-                type="button"
-                className="simulation-button"
-                onClick={() => {
-                  setSos(false);
-                  go("lokasi");
-                }}
-              >
-                <Icon name="ambulance" /> Cari ambulans terdekat <span>Simulasi</span>
-              </button>
               <small>Untuk kondisi gawat darurat, segera hubungi 119 atau 112.</small>
             </section>
           </div>
@@ -496,12 +480,75 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
 }
 
 /* ============================================================
+   DOCTOR SELECTION PAGE
+   ============================================================ */
+function DoctorSelectionPage({
+  go,
+  onSelectDoctor,
+}: {
+  go: (view: View) => void;
+  onSelectDoctor: (name: string) => void;
+}) {
+  const [doctorsList, setDoctorsList] = useState<{ id: number; name: string; specialty: string; initial: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.from("doctors").select("*").order("id").then(({ data }) => {
+      if (data) setDoctorsList(data);
+      setLoading(false);
+    });
+  }, []);
+
+  return (
+    <div style={{ maxWidth: "600px", margin: "40px auto", padding: "0 20px" }}>
+      <button
+        type="button"
+        onClick={() => go("dashboard")}
+        style={{ background: "none", border: "none", color: "#0066cc", cursor: "pointer", fontWeight: "600", marginBottom: "20px", display: "inline-flex", alignItems: "center", gap: "8px", padding: 0, fontSize: "14px" }}
+      >
+        <span style={{ transform: "rotate(180deg)", display: "inline-block" }}><Icon name="arrow" size={16} /></span>
+        Kembali ke Dashboard
+      </button>
+      <h1 style={{ fontSize: "22px", color: "#0f172a", marginBottom: "8px" }}>Pilih Dokter</h1>
+      <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "24px" }}>Pilih dokter yang tersedia untuk memulai konsultasi.</p>
+      {loading ? (
+        <p style={{ color: "#64748b", textAlign: "center", padding: "40px 0" }}>Memuat data dokter...</p>
+      ) : doctorsList.length === 0 ? (
+        <p style={{ color: "#64748b", textAlign: "center", padding: "40px 0" }}>Belum ada dokter terdaftar.</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {doctorsList.map((doc) => (
+            <button
+              key={doc.id}
+              onClick={() => onSelectDoctor(doc.name)}
+              style={{ display: "flex", alignItems: "center", gap: "14px", padding: "16px 20px", background: "#ffffff", border: "1px solid #dce6f0", borderRadius: "12px", cursor: "pointer", textAlign: "left", transition: "border-color 0.15s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#0066cc")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#dce6f0")}
+            >
+              <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "#eaf4ff", color: "#0066cc", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "15px", flexShrink: 0 }}>
+                {doc.initial}
+              </div>
+              <div>
+                <strong style={{ display: "block", fontSize: "15px", color: "#0f172a" }}>{doc.name}</strong>
+                <span style={{ fontSize: "13px", color: "#64748b" }}>{doc.specialty}</span>
+              </div>
+              <Icon name="arrow" size={16} />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
    APP — Session router & listener untuk event reset password
    ============================================================ */
 export default function App() {
   const [view, setView] = useState<View>("landing");
   const [user, setUser] = useState<User | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
+  const [selectedDoctorName, setSelectedDoctorName] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -569,16 +616,26 @@ export default function App() {
         />
       );
     } else {
-      content = <Dashboard go={setView} user={user} />;
+      content = <Dashboard go={setView} user={user} onSelectDoctor={setSelectedDoctorName} />;
     }
   } else if (view === "tes_mental") {
     content = <TesMental go={setView} />;
+  } else if (view === "dokter") {
+    content = (
+      <DoctorSelectionPage
+        go={setView}
+        onSelectDoctor={(name: string) => {
+          setSelectedDoctorName(name);
+          setView("chat");
+        }}
+      />
+    );
   } else if (view === "chat") {
-    content = <Konsultasi go={setView} />;
+    content = <Konsultasi go={setView} doctorName={selectedDoctorName || undefined} />;
   } else if (view === "informasi_detail") {
     content = <InformasiDetail go={setView} />;
   } else if (view === "profil") {
-    content = <Profil go={setView} />;
+    content = <Profil go={setView} user={user} />;
   } else if (view === "pengaturan") {
     content = <Pengaturan go={setView} />;
   } else {

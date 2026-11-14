@@ -1,23 +1,29 @@
 import React, { useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import type { View } from "./App";
 import { Icon } from "./components/ui/Icons";
 import { Brand } from "./components/ui/Brand";
 
 interface ProfilProps {
   go: (view: View) => void;
+  user?: User | null;
 }
 
-export function Profil({ go }: ProfilProps) {
-  const [nama, setNama] = useState("Budi Pratama");
-  const [email, setEmail] = useState("budi.pratama@example.com");
-  const [telepon, setTelepon] = useState("0812-3456-7890");
-  const [tanggalLahir, setTanggalLahir] = useState("1992-05-14");
-  const [golonganDarah, setGolonganDarah] = useState("O+");
-  const [alergi, setAlergi] = useState("Penisilin, Kacang tanah");
-  const [penyakit, setPenyakit] = useState("Asma (ringan), Riwayat gastritis");
-  const [kontakDarurat, setKontakDarurat] = useState("Siti Rahma (Istri) - 0813-9876-5432");
+export function Profil({ go, user }: ProfilProps) {
+  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
+  const [nama, setNama] = useState((meta.full_name as string) || user?.email || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [telepon, setTelepon] = useState((meta.phone as string) || "");
+  const [tanggalLahir, setTanggalLahir] = useState((meta.dob as string) || "");
+  const [golonganDarah, setGolonganDarah] = useState((meta.blood_type as string) || "Belum Tahu");
+  const [alergi, setAlergi] = useState((meta.allergies as string) || "");
+  const [penyakit, setPenyakit] = useState((meta.conditions as string) || "");
+  const [kontakDarurat, setKontakDarurat] = useState((meta.emergency_contact as string) || "");
   const [notice, setNotice] = useState("");
   const [isSaved, setIsSaved] = useState(false);
+
+  const displayName = nama || "Pengguna";
+  const initials = displayName.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase() || "?";
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +86,7 @@ export function Profil({ go }: ProfilProps) {
         <div style={{ background: "#ffffff", borderRadius: "12px", border: "1px solid #dce6f0", padding: "24px 28px", marginBottom: "24px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "#eaf4ff", color: "#0066cc", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "20px" }}>
-              BP
+              {initials}
             </div>
             <div>
               <span className="doc-type" style={{ marginBottom: "4px", display: "inline-block" }}>PROFIL PENGGUNA</span>
