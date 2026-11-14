@@ -19,7 +19,7 @@ type ColorBlindMode = "normal" | "protanopia" | "deuteranopia" | "tritanopia";
 
 const dashboardServices: { icon: IconName; title: string; text: string; tag?: string }[] = [
   { icon: "hospital", title: "Rumah Sakit Terdekat", text: "Peta dan daftar layanan di sekitar Anda" },
-  { icon: "ambulance", title: "Panggil Ambulans", text: "Permintaan penjemputan terdekat", tag: "Simulasi" },
+  { icon: "ambulance", title: "Panggil Ambulans", text: "Permintaan penjemputan terdekat" },
   { icon: "brain", title: "Tes Kesehatan Mental", text: "PHQ-9, GAD-7, DASS-21, dan Big Five" },
   { icon: "doctor", title: "Konsultasi Dokter", text: "Pesan langsung dengan dokter terverifikasi" },
   { icon: "bot", title: "Chatbot Pendamping", text: "Informasi umum dan panduan aplikasi" },
@@ -538,18 +538,6 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                     <Icon name="phone" size={18} /> Telepon 112
                   </a>
                 </div>
-                <button
-                  onClick={() => {
-                    setSos(false);
-                    setNotice("Simulasi pencarian ambulans dimulai");
-                  }}
-                  className="w-full min-h-[44px] flex items-center justify-center gap-2 mt-3 border border-[#b9d6f2] rounded-xl text-[#0066cc] bg-[#eaf4ff] text-[13px] font-bold hover:bg-[#d8eaff] transition-colors"
-                >
-                  <Icon name="ambulance" size={18} /> Cari ambulans terdekat
-                  <span className="py-0.5 px-1.5 rounded text-amber-700 bg-amber-200 text-[10px] uppercase font-bold">
-                    Simulasi
-                  </span>
-                </button>
                 <small className="block mt-4 text-slate-400 text-[11px]">
                   Untuk kondisi gawat darurat, segera hubungi 119 atau 112.
                 </small>
