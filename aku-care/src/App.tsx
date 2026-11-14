@@ -6,9 +6,11 @@ import { TalkbackProvider } from "./Talkback";
 import { DoctorSection } from "./Dokter";
 import { ChatbotSheet } from "./Chatbot";
 import NearbyHospitalsMap from "./RumahSakit";
+import { TesMental } from "./TesMental";
+import { Konsultasi } from "./Konsultasi";
 
-// 1. Tipe View diperbarui untuk form lupa sandi
-type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard";
+// 1. Tipe View diperbarui untuk form lupa sandi, tes mental, dan konsultasi chat
+export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat";
 type IconName =
   | "home" | "heart" | "calendar" | "message" | "book" | "settings"
   | "bell" | "search" | "hospital" | "brain" | "doctor" | "ambulance"
@@ -267,6 +269,11 @@ function Landing({ go }: { go: (view: View) => void }) {
               ))}
             </div>
           </div>
+        </section>
+
+        <section id="pengumuman" className="public-section">
+          <h2>Pengumuman & Siaran Pers</h2>
+          <p>Belum ada pengumuman saat ini.</p>
         </section>
 
         <section className="accessibility-public" id="tentang">
@@ -655,7 +662,16 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
           <nav>
             <span>MENU UTAMA</span>
             {[["home", "Beranda"], ["phone", "Darurat"], ["brain", "Tes Kesehatan"], ["message", "Konsultasi"], ["book", "Informasi"]].map(([icon, label], index) => (
-              <button className={index === 0 ? "active" : ""} key={label} onClick={() => (index === 1 ? setSos(true) : setNotice(`${label} dibuka`))}>
+              <button
+                className={index === 0 ? "active" : ""}
+                key={label}
+                onClick={() => {
+                  if (index === 1) setSos(true);
+                  else if (index === 2) go("tes_mental");
+                  else if (index === 3) go("chat");
+                  else setNotice(`${label} dibuka`);
+                }}
+              >
                 <Icon name={icon as IconName} /> {label}
               </button>
             ))}
@@ -697,7 +713,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                 <span className="banner-label"><Icon name="shield" size={15} /> PENDAMPING KESEHATAN ANDA</span>
                 <h2>Layanan kesehatan yang dapat<br />Anda akses secara mandiri.</h2>
                 <p>Gunakan skrining kesehatan mental, konsultasi dokter, layanan darurat, dan informasi tepercaya sesuai kebutuhan Anda.</p>
-                <button onClick={() => setNotice("Direktori dokter dibuka")}>Mulai konsultasi <Icon name="arrow" size={17} /></button>
+                <button onClick={() => go("chat")}>Mulai konsultasi <Icon name="arrow" size={17} /></button>
               </div>
               <img src={doctorPhoto} alt="Dokter profesional Aku Care" />
             </section>
@@ -713,13 +729,16 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                       <button 
                         key={service.title} 
                         onClick={() => {
-                          // Kita cek judulnya langsung, urutkan dari yang paling spesifik
                           if (service.title === "Rumah Sakit Terdekat") {
                             setShowMap(true);
                           } else if (service.title === "Panggil Ambulans") {
                             setSos(true);
                           } else if (service.title === "Chatbot Pendamping") {
                             setShowChatbot(true);
+                          } else if (service.title === "Tes Kesehatan Mental") {
+                            go("tes_mental");
+                          } else if (service.title === "Konsultasi Dokter") {
+                            go("chat");
                           } else {
                             setNotice(`${service.title} dibuka`);
                           }
@@ -752,13 +771,13 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                   <div className="aside-title"><div><h2>Riwayat skrining</h2><p>Hasil tersimpan pribadi</p></div><Icon name="brain" /></div>
                   <div className="empty-record">
                     <span><Icon name="book" /></span><strong>Belum ada hasil tes</strong><p>Mulai skrining awal untuk memantau kondisi kesehatan mental Anda.</p>
-                    <button onClick={() => setNotice("Katalog tes dibuka")}>Lihat katalog tes</button>
+                    <button onClick={() => go("tes_mental")}>Lihat katalog tes</button>
                   </div>
                   <small>Hasil skrining bukan diagnosis medis.</small>
                 </section>
                 <DoctorSection
                   voiceModeActive={voice} 
-                  onOpenChat={(docName) => setNotice(`Membuka ruang pesan dengan ${docName}`)} 
+                  onOpenChat={() => go("chat")} 
                 />
                 <section className="access-quick">
                   <div className="aside-title"><div><h2>Aksesibilitas cepat</h2><p>Sesuaikan pengalaman Anda</p></div></div>
@@ -880,6 +899,14 @@ export default function App() {
       return <AuthScreen mode="login" go={setView} onAuthSuccess={() => setView("dashboard")} />;
     }
     return <Dashboard go={setView} user={user} />;
+  }
+
+  if (view === "tes_mental") {
+    return <TesMental go={setView} />;
+  }
+
+  if (view === "chat") {
+    return <Konsultasi go={setView} />;
   }
 
   return <Landing go={setView} />;
