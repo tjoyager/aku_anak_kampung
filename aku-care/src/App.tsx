@@ -11,7 +11,7 @@ import { Profil } from "./Profil";
 import { Pengaturan } from "./Pengaturan";
 import { useShakeDetection } from "./hooks/useShakeDetection";
 import Landing from "./pages/Landing";
-import doctorPhoto from "./assets/akk-doctor.jpg";
+import { A11yWidget } from "./components/A11yWidget";
 
 export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat" | "informasi_detail" | "profil" | "pengaturan";
 
@@ -647,7 +647,7 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                 <p>Gunakan skrining kesehatan mental, konsultasi dokter, layanan darurat, dan informasi tepercaya sesuai kebutuhan Anda.</p>
                 <button onClick={() => go("chat")}>Mulai konsultasi <Icon name="arrow" size={17} /></button>
               </div>
-              <img src={doctorPhoto} alt="Dokter profesional Aku Care" />
+              <img src="/fitur-1.jpg" alt="Dokter profesional Aku Care" />
             </section>
             <div className="dash-layout">
               <div className="dash-primary">
@@ -895,36 +895,34 @@ export default function App() {
     );
   }
 
+  // Render halaman berdasarkan state view
+  let content;
   if (view === "login" || view === "register" || view === "forgot" || view === "update_password") {
-    return <AuthScreen mode={view} go={setView} onAuthSuccess={() => setView("dashboard")} />;
-  }
-
-  if (view === "dashboard") {
+    content = <AuthScreen mode={view} go={setView} onAuthSuccess={() => setView("dashboard")} />;
+  } else if (view === "dashboard") {
     if (!user) {
-      return <AuthScreen mode="login" go={setView} onAuthSuccess={() => setView("dashboard")} />;
+      content = <AuthScreen mode="login" go={setView} onAuthSuccess={() => setView("dashboard")} />;
+    } else {
+      content = <Dashboard go={setView} user={user} />;
     }
-    return <Dashboard go={setView} user={user} />;
+  } else if (view === "tes_mental") {
+    content = <TesMental go={setView} />;
+  } else if (view === "chat") {
+    content = <Konsultasi go={setView} />;
+  } else if (view === "informasi_detail") {
+    content = <InformasiDetail go={setView} />;
+  } else if (view === "profil") {
+    content = <Profil go={setView} />;
+  } else if (view === "pengaturan") {
+    content = <Pengaturan go={setView} />;
+  } else {
+    content = <Landing go={setView} />;
   }
 
-  if (view === "tes_mental") {
-    return <TesMental go={setView} />;
-  }
-
-  if (view === "chat") {
-    return <Konsultasi go={setView} />;
-  }
-
-  if (view === "informasi_detail") {
-    return <InformasiDetail go={setView} />;
-  }
-
-  if (view === "profil") {
-    return <Profil go={setView} />;
-  }
-
-  if (view === "pengaturan") {
-    return <Pengaturan go={setView} />;
-  }
-
-  return <Landing go={setView} />;
+  return (
+    <>
+      <A11yWidget /> {/* Widget aksesibilitas selalu tampil */}
+      {content}
+    </>
+  );
 }
