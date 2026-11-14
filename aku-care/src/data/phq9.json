@@ -1,0 +1,83 @@
+[
+  {
+    "question": "Kurang tertarik atau bersemangat dalam melakukan hal-hal?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "question": "Merasa sedih, murung, atau tertekan?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "question": "Sulit tidur atau tidur berlebihan?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "question": "Merasa lelah atau kekurangan energi?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "question": "Kurang nafsu makan atau makan berlebih?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "question": "Merasa buruk tentang diri sendiri, atau merasa bahwa Anda telah gagal?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "question": "Sulit berkonsentrasi pada hal-hal, seperti membaca koran atau menonton televisi?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "question": "Bergerak atau berbicara sangat lambat sehingga orang lain bisa memperhatikan? Atau sebaliknya, sangat gelisah sehingga Anda bergerak lebih dari biasanya?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "question": "Berpikir bahwa Anda lebih baik mati, atau ingin melukai diri sendiri dengan cara tertentu?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  }
+]
