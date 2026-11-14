@@ -8,6 +8,7 @@ import { ChatbotSheet } from "./Chatbot";
 import NearbyHospitalsMap from "./RumahSakit";
 import { TesMental } from "./TesMental";
 import { Konsultasi } from "./Konsultasi";
+import { useShakeDetection } from "./hooks/useShakeDetection";
 
 // 1. Tipe View diperbarui untuk form lupa sandi, tes mental, dan konsultasi chat
 export type View = "landing" | "login" | "register" | "forgot" | "update_password" | "dashboard" | "tes_mental" | "chat";
@@ -82,6 +83,7 @@ function PublicHeader({ go }: { go: (view: View) => void }) {
           <span>Portal Informasi Kesehatan Inklusif</span>
           <span className="gov-meta">Bahasa Indonesia</span>
           <button><Icon name="volume" size={15} /> Mode Suara</button>
+          <button type="button" onClick={() => document.body.classList.toggle("font-dyslexic")}><Icon name="book" size={15} /> Font Disleksia</button>
           <button>Ukuran Teks A+</button>
         </div>
       </div>
@@ -623,11 +625,57 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
   const [showChatbot, setShowChatbot] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [notice, setNotice] = useState("");
+  const [dyslexic, setDyslexic] = useState(false);
+  const [shakeModalOpen, setShakeModalOpen] = useState(false);
+  const [countdown, setCountdown] = useState(3);
 
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const displayName = (meta.full_name as string) || (meta.username as string) || user.email || "Budi Pratama";
   const firstName = displayName.split(" ")[0];
   const initials = displayName.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase() || "BP";
+
+  useEffect(() => {
+    if (dyslexic) {
+      document.body.classList.add("font-dyslexic");
+    } else {
+      document.body.classList.remove("font-dyslexic");
+    }
+    return () => {
+      document.body.classList.remove("font-dyslexic");
+    };
+  }, [dyslexic]);
+
+  const toggleDyslexic = () => {
+    setDyslexic((prev) => !prev);
+  };
+
+  // Shake-to-SOS (DeviceMotion API)
+  useShakeDetection(() => {
+    if (!shakeModalOpen && !sos) {
+      setCountdown(3);
+      setShakeModalOpen(true);
+      if ("vibrate" in navigator) {
+        navigator.vibrate([200, 100, 200]);
+      }
+    }
+  });
+
+  // Countdown timer untuk memanggil bantuan darurat
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (shakeModalOpen) {
+      if (countdown > 0) {
+        timer = setTimeout(() => {
+          setCountdown((c) => c - 1);
+        }, 1000);
+      } else {
+        setShakeModalOpen(false);
+        setSos(true);
+        setNotice("Panggilan darurat SOS diaktifkan otomatis via deteksi guncangan!");
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [shakeModalOpen, countdown]);
 
   useEffect(() => {
     if (!notice) return;
@@ -794,6 +842,18 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
                     <button role="switch" aria-checked="false" className="switch" onClick={() => setNotice("Mode getaran siap diterapkan")}><i /></button>
                   </label>
                   <label>
+                    <span><Icon name="book" size={17} /> Font Ramah Disleksia</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={dyslexic}
+                      className={`switch ${dyslexic ? "on" : ""}`}
+                      onClick={toggleDyslexic}
+                    >
+                      <i />
+                    </button>
+                  </label>
+                  <label>
                     <span><Icon name="settings" size={17} /> Mode buta warna</span>
                     <button className="access-select" onClick={() => setNotice("Pilihan mode warna dibuka")}>Normal</button>
                   </label>
@@ -815,6 +875,67 @@ function Dashboard({ go, user }: { go: (view: View) => void; user: User }) {
               <div className="emergency-links"><a href="tel:119"><Icon name="phone" /> Telepon 119</a><a href="tel:112"><Icon name="phone" /> Telepon 112</a></div>
               <button className="simulation-button" onClick={() => { setSos(false); setNotice("Simulasi pencarian ambulans dimulai"); }}><Icon name="ambulance" /> Cari ambulans terdekat <span>Simulasi</span></button>
               <small>Untuk kondisi gawat darurat, segera hubungi 119 atau 112.</small>
+            </section>
+          </div>
+        )}
+        {shakeModalOpen && (
+          <div className="modal-backdrop" style={{ zIndex: 10000 }}>
+            <section
+              className="sos-modal"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="shake-sos-title"
+              style={{
+                border: "3px solid #dc2626",
+                boxShadow: "0 10px 25px rgba(220, 38, 38, 0.3)",
+                textAlign: "center",
+                maxWidth: "420px",
+              }}
+            >
+              <div
+                className="sos-modal-icon"
+                style={{
+                  background: "#fee2e2",
+                  color: "#dc2626",
+                  margin: "0 auto 12px auto",
+                  fontSize: "30px",
+                }}
+              >
+                📳
+              </div>
+              <p className="modal-kicker" style={{ color: "#dc2626", fontWeight: "800" }}>
+                DETEKSI GUNCANGAN PERANGKAT
+              </p>
+              <h2 id="shake-sos-title" style={{ fontSize: "19px", color: "#991b1b", marginBottom: "8px" }}>
+                Guncangan Darurat Terdeteksi!
+              </h2>
+              <p style={{ color: "#475569", margin: "0 0 16px 0", fontSize: "14px" }}>
+                Memanggil bantuan darurat dalam:
+              </p>
+              <div
+                style={{
+                  fontSize: "52px",
+                  fontWeight: "900",
+                  color: "#dc2626",
+                  margin: "0 0 16px 0",
+                  lineHeight: "1",
+                }}
+              >
+                {countdown}
+              </div>
+              <button
+                type="button"
+                className="simulation-button"
+                onClick={() => setShakeModalOpen(false)}
+                style={{
+                  background: "#ffffff",
+                  color: "#334155",
+                  border: "2px solid #cbd5e1",
+                  width: "100%",
+                }}
+              >
+                ✕ Batal (Bukan Situasi Darurat)
+              </button>
             </section>
           </div>
         )}

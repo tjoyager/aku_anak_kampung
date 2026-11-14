@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buku Saku P3K Darurat — AkuCare (Mode Offline)</title>
+  <style>
+    :root {
+      --primary: #0066cc;
+      --danger: #dc2626;
+      --dark: #0f172a;
+      --text: #334155;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 16px;
+    }
+    .container { max-width: 680px; margin: 0 auto; }
+    .offline-banner {
+      background: #fef2f2;
+      border: 2px solid var(--danger);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .offline-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+    .offline-banner h1 {
+      font-size: 18px;
+      color: #991b1b;
+      margin-bottom: 4px;
+    }
+    .offline-banner p {
+      font-size: 13px;
+      color: #7f1d1d;
+      margin: 0;
+    }
+    .emergency-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .btn-call {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--danger);
+      color: #ffffff;
+      padding: 14px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(220,38,38,0.2);
+    }
+    .btn-call.secondary {
+      background: #ea580c;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .card-badge {
+      display: inline-block;
+      background: #e0f2fe;
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .card h2 {
+      font-size: 17px;
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+    ol, ul {
+      padding-left: 20px;
+      font-size: 14px;
+    }
+    li { margin-bottom: 8px; }
+    .highlight {
+      background: #fef08a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      color: #854d0e;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 28px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: #64748b;
+    }
+    .btn-reload {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Offline Alert -->
+    <div class="offline-banner" role="alert">
+      <div class="offline-icon">📡</div>
+      <div>
+        <h1>Anda Sedang Offline — Buku Saku P3K</h1>
+        <p>Koneksi internet terputus. Buku panduan darurat ini tersimpan lokal di perangkat Anda agar tetap dapat diakses kapan saja.</p>
+      </div>
+    </div>
+
+    <!-- Panggilan Darurat -->
+    <div class="emergency-bar">
+      <a href="tel:119" class="btn-call">📞 Panggil 119 (Medis)</a>
+      <a href="tel:112" class="btn-call secondary">🚨 Panggil 112 (Darurat)</a>
+    </div>
+
+    <!-- 1. Panduan CPR / RJP -->
+    <div class="card">
+      <span class="card-badge">PANDUAN 1</span>
+      <h2>Resusitasi Jantung Paru (CPR / RJP) Dewasa</h2>
+      <ol>
+        <li><strong>Periksa Respons:</strong> Tepuk bahu korban dan panggil dengan suara keras.</li>
+        <li><strong>Hubungi 119:</strong> Segera minta orang lain menghubungi ambulans 119.</li>
+        <li><strong>Posisi Tangan:</strong> Letakkan tumit satu tangan di tengah dada (tulang dada), letakkan tangan lain di atasnya dan saling mengunci jari.</li>
+        <li><strong>Kompresi Dada:</strong> Tekan sedalam <span class="highlight">5–6 cm</span> dengan kecepatan <span class="highlight">100–120 kali/menit</span> (irama lagu <em>"Stayin' Alive"</em>).</li>
+        <li>Biarkan dada kembali ke posisi semula di antara setiap tekanan. Lakukan tanpa henti hingga tim medis tiba atau korban sadar.</li>
+      </ol>
+    </div>
+
+    <!-- 2. Menangani Tersedak -->
+    <div class="card">
+      <span class="card-badge">PANDUAN 2</span>
+      <h2>Menangani Orang Tersedak (Heimlich Maneuver)</h2>
+      <ol>
+        <li><strong>5 Tepukan Punggung:</strong> Berdiri di belakang korban, condongkan badannya sedikit ke depan, dan berikan 5 tepukan kuat di antara tulang belikat dengan tumit tangan.</li>
+        <li><strong>5 Hentakan Perut:</strong> Lingkarkan lengan di pinggang korban. Kepalkan satu tangan tepat di atas pusar korban, pegang kepalan dengan tangan lain, lalu dorong ke dalam dan ke atas dengan cepat.</li>
+        <li>Ulangi 5 tepukan punggung dan 5 hentakan perut hingga benda asing keluar.</li>
+      </ol>
+    </div>
+
+    <!-- 3. Pendarahan Hebat -->
+    <div class="card">
+      <span class="card-badge">PANDUAN 3</span>
+      <h2>Menghentikan Pendarahan Hebat</h2>
+      <ul>
+        <li><strong>Tekan Langsung:</strong> Tekan area luka kuat-kuat menggunakan kain bersih atau kassa steril.</li>
+        <li><strong>Jangan Lepas Kain:</strong> Jika darah tembus, tambahkan kain baru di atasnya tanpa melepas kain pertama.</li>
+        <li><strong>Tinggikan:</strong> Jika memungkinkan, posisikan bagian tubuh yang berdarah lebih tinggi dari jantung.</li>
+      </ul>
+    </div>
+
+    <!-- 4. Luka Bakar -->
+    <div class="card">
+      <span class="card-badge">PANDUAN 4</span>
+      <h2>Pertolongan Pertama Luka Bakar</h2>
+      <ul>
+        <li><strong>Alirkan Air Dingin:</strong> Segera dinginkan luka dengan air mengalir suhu ruang selama <span class="highlight">10–20 menit</span>.</li>
+        <li><strong>JANGAN gunakan:</strong> Es batu, pasta gigi, mentega, atau minyak (dapat memicu infeksi dan kerusakan jaringan).</li>
+        <li>Tutup luka bakar secara longgar menggunakan kain bersih atau plastik cling wrap bersih.</li>
+      </ul>
+    </div>
+
+    <!-- Footer & Refresh -->
+    <div class="footer">
+      <p>AkuCare (Aku Anak Kampung) — Panduan P3K Offline Mandiri</p>
+      <button class="btn-reload" onclick="window.location.reload()">Coba Muat Ulang Aplikasi</button>
+    </div>
+  </div>
+</body>
+</html>

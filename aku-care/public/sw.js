@@ -1,12 +1,14 @@
-const CACHE_NAME = 'akucare-cache-v1';
+const CACHE_NAME = 'akucare-cache-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/favicon.png'
+  '/favicon.png',
+  '/logo.png',
+  '/offline-p3k.html'
 ];
 
-// Install event: cache essential assets
+// Install event: cache essential assets including offline first-aid book
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -30,7 +32,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event: Network-first falling back to cache
+// Fetch event: Network-first falling back to cache, with offline P3K fallback for navigation
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
@@ -47,14 +49,19 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       })
       .catch(async () => {
+        // Fallback for HTML navigation when offline: return emergency offline-p3k.html
+        if (event.request.mode === 'navigate') {
+          const p3kFallback = await caches.match('/offline-p3k.html');
+          if (p3kFallback) return p3kFallback;
+
+          const indexFallback = await caches.match('/index.html');
+          if (indexFallback) return indexFallback;
+        }
+
+        // Check if any matching asset is in cache
         const cachedResponse = await caches.match(event.request);
         if (cachedResponse) {
           return cachedResponse;
-        }
-
-        if (event.request.mode === 'navigate') {
-          const fallback = await caches.match('/index.html');
-          if (fallback) return fallback;
         }
 
         return new Response('Offline: Konten tidak tersedia tanpa koneksi internet.', {
