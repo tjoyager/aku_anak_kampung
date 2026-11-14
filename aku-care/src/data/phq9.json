@@ -1,11 +1,101 @@
 [
-  { "id": 1, "text": "Kurang berminat atau bergairah dalam melakukan apapun" },
-  { "id": 2, "text": "Merasa murung, sedih, atau putus asa" },
-  { "id": 3, "text": "Sulit tidur, sering terbangun, atau terlalu banyak tidur" },
-  { "id": 4, "text": "Merasa lelah atau kurang bertenaga" },
-  { "id": 5, "text": "Kurang nafsu makan atau makan terlalu banyak" },
-  { "id": 6, "text": "Merasa buruk tentang diri sendiri, merasa gagal, atau mengecewakan keluarga" },
-  { "id": 7, "text": "Sulit berkonsentrasi pada sesuatu, misalnya membaca atau menonton televisi" },
-  { "id": 8, "text": "Bergerak atau berbicara sangat lambat, atau sebaliknya merasa gelisah dan tidak bisa diam" },
-  { "id": 9, "text": "Merasa lebih baik mati atau ingin melukai diri sendiri dengan cara apapun" }
+  {
+    "id": 1,
+    "text": "Kurang berminat atau bergairah dalam melakukan apapun",
+    "question": "Kurang tertarik atau bersemangat dalam melakukan hal-hal?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "id": 2,
+    "text": "Merasa murung, sedih, atau putus asa",
+    "question": "Merasa sedih, murung, atau tertekan?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "id": 3,
+    "text": "Sulit tidur, sering terbangun, atau terlalu banyak tidur",
+    "question": "Sulit tidur atau tidur berlebihan?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "id": 4,
+    "text": "Merasa lelah atau kurang bertenaga",
+    "question": "Merasa lelah atau kekurangan energi?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "id": 5,
+    "text": "Kurang nafsu makan atau makan terlalu banyak",
+    "question": "Kurang nafsu makan atau makan berlebih?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "id": 6,
+    "text": "Merasa buruk tentang diri sendiri, merasa gagal, atau mengecewakan keluarga",
+    "question": "Merasa buruk tentang diri sendiri, atau merasa bahwa Anda telah gagal?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "id": 7,
+    "text": "Sulit berkonsentrasi pada sesuatu, misalnya membaca atau menonton televisi",
+    "question": "Sulit berkonsentrasi pada hal-hal, seperti membaca koran atau menonton televisi?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "id": 8,
+    "text": "Bergerak atau berbicara sangat lambat, atau sebaliknya merasa gelisah dan tidak bisa diam",
+    "question": "Bergerak atau berbicara sangat lambat sehingga orang lain bisa memperhatikan? Atau sebaliknya, sangat gelisah sehingga Anda bergerak lebih dari biasanya?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  },
+  {
+    "id": 9,
+    "text": "Merasa lebih baik mati atau ingin melukai diri sendiri dengan cara apapun",
+    "question": "Berpikir bahwa Anda lebih baik mati, atau ingin melukai diri sendiri dengan cara tertentu?",
+    "options": [
+      { "text": "Tidak sama sekali", "value": 0 },
+      { "text": "Beberapa hari", "value": 1 },
+      { "text": "Lebih dari setengah hari", "value": 2 },
+      { "text": "Hampir setiap hari", "value": 3 }
+    ]
+  }
 ]
