@@ -118,17 +118,19 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
   };
 
   const handleServiceClick = (serviceTitle: string, icon: IconName) => {
-    if (icon === "ambulance") {
+    if (icon === "ambulance" || serviceTitle === "Panggil Ambulans") {
       if (vibration) activateVibration([300, 100, 300]);
       setSos(true);
-    } else if (serviceTitle === "Tes Kesehatan Mental") {
-      setShowPHQ9(true);
     } else if (serviceTitle === "Rumah Sakit Terdekat") {
-      setShowNearbyHospitals(true);
+      go("lokasi");
     } else if (serviceTitle === "Chatbot Pendamping") {
-      setShowChatbot(true);
+      go("chatbot");
     } else if (serviceTitle === "Konsultasi Dokter") {
-      setShowChatRoom(true);
+      go("chat");
+    } else if (serviceTitle === "Tes Kesehatan Mental") {
+      go("tes_mental");
+    } else if (serviceTitle === "Informasi Kesehatan") {
+      go("informasi_detail");
     } else {
       setNotice(`${serviceTitle} dibuka`);
     }
@@ -173,7 +175,17 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
             {sidebarMenu.map(({ icon, label }, index) => (
               <button
                 key={label}
-                onClick={() => (index === 1 ? setSos(true) : setNotice(`${label} dibuka`))}
+                onClick={
+                  index === 1
+                    ? () => setSos(true)
+                    : label === "Tes Kesehatan"
+                    ? () => go("tes_mental")
+                    : label === "Konsultasi"
+                    ? () => go("chat")
+                    : label === "Informasi"
+                    ? () => go("informasi_detail")
+                    : () => setNotice(`${label} dibuka`)
+                }
                 className={`min-h-[44px] flex items-center gap-3 px-3 rounded-xl text-[13px] font-medium text-left transition-all ${
                   index === 0
                     ? "text-[#0066cc] bg-[#eaf4ff] shadow-[inset_2px_0_0_#0066cc]"
@@ -188,13 +200,13 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
               Pengelolaan
             </span>
             <button
-              onClick={() => setNotice("Profil medis dibuka")}
+              onClick={() => go("profil")}
               className="min-h-[44px] flex items-center gap-3 px-3 rounded-xl text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
             >
               <Icon name="user" size={18} /> Profil & Info Medis
             </button>
             <button
-              onClick={() => setNotice("Pengaturan aksesibilitas dibuka")}
+              onClick={() => go("pengaturan")}
               className="min-h-[44px] flex items-center gap-3 px-3 rounded-xl text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
             >
               <Icon name="settings" size={18} /> Pengaturan
@@ -253,7 +265,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                 </p>
               </div>
               <button
-                onClick={() => setNotice("Pengaturan cepat dibuka")}
+                onClick={() => go("pengaturan")}
                 className="hidden sm:flex h-[42px] items-center gap-2 px-4 border border-slate-200 rounded-xl text-slate-700 bg-white text-[13px] font-semibold hover:bg-slate-50 transition-colors shadow-sm"
               >
                 <Icon name="settings" size={18} /> Pengaturan Aksesibilitas
@@ -281,7 +293,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setNotice("Direktori dokter dibuka")}
+                  onClick={() => go("chat")}
                   className="min-h-[42px] flex items-center gap-2 mt-6 px-5 rounded-lg text-[#0755a3] bg-white text-[13px] font-bold hover:bg-slate-50 transition-colors shadow-sm"
                 >
                   Mulai Konsultasi <Icon name="arrow" size={16} />
@@ -324,7 +336,21 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                         variants={staggerItem}
                         whileHover={{ y: -3 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleServiceClick(service.title, service.icon)}
+                        onClick={
+                          service.title === "Rumah Sakit Terdekat"
+                            ? () => go("lokasi")
+                            : service.title === "Chatbot Pendamping"
+                            ? () => go("chatbot")
+                            : service.title === "Konsultasi Dokter"
+                            ? () => go("chat")
+                            : service.title === "Tes Kesehatan Mental"
+                            ? () => go("tes_mental")
+                            : service.title === "Panggil Ambulans"
+                            ? () => setSos(true)
+                            : service.title === "Informasi Kesehatan"
+                            ? () => go("informasi_detail")
+                            : () => handleServiceClick(service.title, service.icon)
+                        }
                         aria-label={`Buka layanan ${service.title}`}
                         className="min-h-[84px] grid grid-cols-[48px_1fr_auto] items-center gap-4 p-4 border border-slate-200 rounded-xl text-slate-600 bg-white text-left transition-all hover:border-[#b9d6f2] hover:shadow-[0_8px_24px_#082d5810] group"
                       >
@@ -368,7 +394,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                       </p>
                     </div>
                     <button
-                      onClick={() => setNotice("Semua informasi dibuka")}
+                      onClick={() => go("informasi_detail")}
                       className="flex items-center gap-1 p-1 border-0 text-[#0066cc] bg-transparent text-[13px] font-bold hover:underline"
                     >
                       Lihat semua <Icon name="arrow" size={15} />
@@ -399,7 +425,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                           </p>
                         </div>
                         <button
-                          onClick={() => setNotice("Artikel dibuka")}
+                          onClick={() => go("informasi_detail")}
                           className="flex items-center gap-1.5 mt-4 p-0 border-0 text-[#0066cc] bg-transparent text-[12px] font-bold hover:gap-2.5 transition-all w-fit"
                         >
                           Baca artikel <Icon name="arrow" size={14} />
@@ -435,7 +461,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
                       Mulai skrining awal untuk memantau kondisi kesehatan mental Anda.
                     </p>
                     <button
-                      onClick={() => setNotice("Katalog tes dibuka")}
+                      onClick={() => go("tes_mental")}
                       className="mt-4 py-2 px-4 border border-[#b9d6f2] rounded-lg text-[#0066cc] bg-[#eaf4ff] text-[12px] font-bold hover:bg-[#d8eaff] transition-colors"
                     >
                       Lihat katalog tes
@@ -449,7 +475,7 @@ export default function Dashboard({ go, user }: { go: (view: View) => void; user
 
                 <DoctorSection
                   voiceModeActive={voice}
-                  onOpenChat={(docName) => setNotice(`Membuka ruang pesan dengan ${docName}`)}
+                  onOpenChat={() => go("chat")}
                 />
 
               </aside>

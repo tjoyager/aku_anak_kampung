@@ -10,6 +10,8 @@ import { TesMental } from "./TesMental";
 import { Konsultasi } from "./Konsultasi";
 import { Profil } from "./Profil";
 import { Pengaturan } from "./Pengaturan";
+import { Chatbot } from "./Chatbot";
+import { RumahSakit } from "./RumahSakit";
 
 export type View =
   | "landing"
@@ -22,7 +24,9 @@ export type View =
   | "chat"
   | "informasi_detail"
   | "profil"
-  | "pengaturan";
+  | "pengaturan"
+  | "chatbot"
+  | "lokasi";
 
 export default function App() {
   const [view, setView] = useState<View>("landing");
@@ -62,6 +66,9 @@ export default function App() {
     );
   }
 
+  if (view === "chatbot") return <Chatbot go={setView} />;
+  if (view === "lokasi") return <RumahSakit go={setView} />;
+
   let content;
   if (
     view === "login" ||
@@ -92,10 +99,6 @@ export default function App() {
     content = <TesMental go={setView} />;
   } else if (view === "chat") {
     content = <Konsultasi go={setView} />;
-  } else if (view === "lokasi") {
-    content = <RumahSakit go={setView} />;
-  } else if (view === "chatbot") {
-    content = <Chatbot go={setView} />;
   } else if (view === "informasi_detail") {
     content = <InformasiDetail go={setView} />;
   } else if (view === "profil") {
